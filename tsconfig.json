@@ -1,0 +1,12 @@
+{
+  "extends": "@tsconfig/node14/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist/src",
+    "rootDir": "src",
+    "lib": ["esnext.asynciterable"],
+    "typeRoots": ["@types", "node_modules/@types", "src/types"],
+    "resolveJsonModule": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

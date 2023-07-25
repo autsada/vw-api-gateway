@@ -1,0 +1,8 @@
+.ssl
+dist
+node_modules
+# Keep environment variables out of version control
+.env
+.env.test
+.env.prod
+gcp.txt

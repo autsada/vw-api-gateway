@@ -1,0 +1,347 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+generator nexusPrisma {
+  provider = "nexus-prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  TRADITIONAL
+  WALLET
+}
+
+model Account {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime?
+  owner     String      @unique // EOA address
+  authUid   String?     @unique // Firebase Auth uid
+  type      AccountType
+  profiles  Profile[]
+}
+
+model Profile {
+  id               String           @id @default(cuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime?
+  owner            String // EOA Address
+  name             String           @unique @db.VarChar(64)
+  displayName      String           @db.VarChar(64)
+  image            String? // Image url
+  imageRef         String? // Image storage ref 
+  bannerImage      String?
+  bannerImageRef   String?
+  defaultColor     String?
+  accountId        String
+  account          Account          @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  followers        Follow[]         @relation("Follower")
+  following        Follow[]         @relation("Following")
+  watchPreferences Category[]       @default([])
+  readPreferences  Category[]       @default([])
+  publishes        Publish[]
+  likes            Like[]
+  disLikes         DisLike[]
+  sentTips         Tip[]            @relation("Sent")
+  receivedTips     Tip[]            @relation("Received")
+  comments         Comment[]
+  commentLikes     CommentLike[]
+  commentDisLikes  CommentDisLike[]
+  watchLater       WatchLater[]
+  playlists        Playlist[]
+  dontRecommends   DontRecommend[]
+  reports          Report[]
+  bookmarks        Bookmark[]
+}
+
+model Follow {
+  createdAt   DateTime @default(now())
+  followerId  String
+  follower    Profile  @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   Profile  @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+}
+
+enum Category {
+  Music
+  Movies
+  Entertainment
+  Sports
+  Food
+  Travel
+  Gaming
+  News
+  Animals
+  Education
+  Science
+  Technology
+  Programming
+  AI
+  Blockchain
+  LifeStyle
+  Vehicles
+  Children
+  Women
+  Men
+  Other
+}
+
+enum PublishType {
+  Video
+  Ads
+  Blog
+  Podcast
+  Short
+}
+
+// A model for the playback of a publish typed video
+model Playback {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  videoId   String
+  thumbnail String // Thumbnail image
+  preview   String // Preview url
+  duration  Float // Duration
+  hls       String // Playback url - hls
+  dash      String // Playback url - dash
+  publishId String    @unique
+  publish   Publish?  @relation(fields: [publishId], references: [id], onDelete: Cascade)
+}
+
+// A model for the blog of a publish typed blog
+model Blog {
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime?
+  content     Json
+  htmlContent String?
+  readingTime String?
+  excerpt     String?
+  publishId   String    @unique
+  publish     Publish?  @relation(fields: [publishId], references: [id], onDelete: Cascade)
+}
+
+// Thumbnail type - generated or custom
+enum ThumbnailType {
+  generated
+  custom
+}
+
+enum Visibility {
+  draft
+  private
+  public
+}
+
+model Publish {
+  id                String         @id @default(cuid())
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime?
+  creatorId         String
+  creator           Profile        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  contentURI        String? // A url of the raw file in cloud storage
+  contentRef        String? // A reference path to the raw file in cloud storage
+  filename          String?
+  thumbnail         String? // A video thumbnail
+  thumbnailRef      String? // A reference path in cloud storage
+  thumbnailType     ThumbnailType  @default(generated)
+  title             String?        @db.VarChar(128)
+  description       String?        @db.VarChar(5000)
+  views             Int            @default(0)
+  primaryCategory   Category?
+  secondaryCategory Category?
+  publishType       PublishType?
+  visibility        Visibility     @default(draft)
+  tags              String?
+  uploadError       Boolean        @default(false)
+  transcodeError    Boolean        @default(false)
+  uploading         Boolean        @default(false)
+  deleting          Boolean        @default(false)
+  playback          Playback?
+  blog              Blog?
+  likes             Like[]
+  dislikes          DisLike[]
+  tips              Tip[]
+  comments          Comment[]      @relation("MainComment")
+  watchLater        WatchLater[]
+  playlistItems     PlaylistItem[]
+  reported          Report[]
+  bookmarks         Bookmark[]
+}
+
+// Publish's Like
+model Like {
+  createdAt DateTime @default(now())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  publishId String
+  publish   Publish  @relation(fields: [publishId], references: [id], onDelete: Cascade)
+
+  @@unique(fields: [profileId, publishId], name: "identifier")
+}
+
+// Publish's DisLike
+model DisLike {
+  createdAt DateTime @default(now())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  publishId String
+  publish   Publish  @relation(fields: [publishId], references: [id], onDelete: Cascade)
+
+  @@unique(fields: [publishId, profileId], name: "identifier")
+}
+
+// Publish' tip
+model Tip {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  senderId   String // Sender profile id
+  sender     Profile  @relation("Sent", fields: [senderId], references: [id])
+  from       String // Sender wallet address
+  publish    Publish  @relation(fields: [publishId], references: [id])
+  publishId  String
+  receiver   Profile  @relation("Received", fields: [receiverId], references: [id])
+  receiverId String // Receiver profile id
+  to         String // Receiver wallet address
+  amount     String // Use String for ether amount
+  fee        String // Use String for ether amount
+}
+
+enum CommentType {
+  PUBLISH
+  COMMENT
+}
+
+// Publish's Comment
+model Comment {
+  id              String           @id @default(cuid())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime?
+  creatorId       String
+  creator         Profile          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  publishId       String
+  publish         Publish          @relation("MainComment", fields: [publishId], references: [id], onDelete: Cascade) // The publish that the comment belongs to.
+  // A comment that the comment belongs to, if `null` it means the comment was made on a publish directly, otherwise it was made on a comment.
+  commentId       String?
+  comment         Comment?         @relation("SubComment", fields: [commentId], references: [id], onDelete: Cascade)
+  comments        Comment[]        @relation("SubComment") // The child comments
+  content         String?          @db.VarChar(10000) // Comment on a video
+  contentBlog     Json? // Comment on a blog
+  htmlContentBlog String? // html string for comment on a blog
+  commentType     CommentType
+  likes           CommentLike[]
+  disLikes        CommentDisLike[]
+}
+
+// Comment's Like
+model CommentLike {
+  createdAt DateTime @default(now())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique(fields: [commentId, profileId], name: "identifier")
+}
+
+// Comment's DisLike
+model CommentDisLike {
+  createdAt DateTime @default(now())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique(fields: [commentId, profileId], name: "identifier")
+}
+
+// Watch later ]
+model WatchLater {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  publishId String
+  publish   Publish  @relation(fields: [publishId], references: [id], onDelete: Cascade)
+}
+
+model Playlist {
+  id          String         @id @default(cuid())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime?      @default(now())
+  name        String         @db.VarChar(120)
+  description String?        @db.VarChar(2000)
+  ownerId     String // An id of the profile who owns the playlist
+  owner       Profile        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  items       PlaylistItem[]
+
+  @@unique(fields: [name, ownerId], name: "identifier")
+}
+
+model PlaylistItem {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  ownerId    String // An id of the profile who owns the item
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  publishId  String
+  publish    Publish  @relation(fields: [publishId], references: [id], onDelete: Cascade)
+
+  @@unique(fields: [playlistId, publishId], name: "identifier")
+}
+
+model DontRecommend {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  requestorId String
+  targetId    String
+  target      Profile  @relation(fields: [targetId], references: [id])
+
+  @@unique(fields: [requestorId, targetId], name: "identifier")
+}
+
+enum ReportReason {
+  adult
+  violent
+  harass
+  hateful
+  harmful
+  abuse
+  terrorism
+  spam
+  mislead
+}
+
+model Report {
+  id            String       @id @default(cuid())
+  createdAt     DateTime     @default(now())
+  submittedById String
+  submittedBy   Profile      @relation(fields: [submittedById], references: [id], onDelete: Cascade)
+  publishId     String
+  publish       Publish      @relation(fields: [publishId], references: [id], onDelete: Cascade)
+  reason        ReportReason
+
+  @@unique(fields: [submittedById, publishId, reason], name: "identifier")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  profileId String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  publish   Publish  @relation(fields: [publishId], references: [id], onDelete: Cascade)
+  publishId String
+
+  @@unique(fields: [profileId, publishId], name: "identifier")
+}
