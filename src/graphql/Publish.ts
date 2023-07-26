@@ -2580,7 +2580,7 @@ export const DeletePublishInput = inputObjectType({
 export const CalculateTipsResult = objectType({
   name: "CalculateTipsResult",
   definition(t) {
-    t.nonNull.int("tips")
+    t.nonNull.string("tips")
   },
 })
 

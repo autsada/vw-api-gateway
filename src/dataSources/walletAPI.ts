@@ -70,7 +70,7 @@ export class WalletAPI extends RESTDataSource {
   /**
    * @dev Calculate how much tips in wei for a given usd amount
    */
-  async calculateTips(qty: number): Promise<{ tips: number }> {
+  async calculateTips(qty: number): Promise<{ tips: string }> {
     return this.post("wallet/tips/calculate", { body: { qty } })
   }
 

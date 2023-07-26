@@ -72,7 +72,7 @@ input CacheSessionInput {
 }
 
 type CalculateTipsResult {
-  tips: Int!
+  tips: String!
 }
 
 enum Category {

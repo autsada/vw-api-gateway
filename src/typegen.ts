@@ -406,7 +406,7 @@ export interface NexusGenObjects {
     node?: NexusGenRootTypes['Bookmark'] | null; // Bookmark
   }
   CalculateTipsResult: { // root type
-    tips: number; // Int!
+    tips: string; // String!
   }
   CheckPublishPlaylistsResponse: { // root type
     isInWatchLater: boolean; // Boolean!
@@ -678,7 +678,7 @@ export interface NexusGenFieldTypes {
     node: NexusGenRootTypes['Bookmark'] | null; // Bookmark
   }
   CalculateTipsResult: { // field return type
-    tips: number; // Int!
+    tips: string; // String!
   }
   CheckPublishPlaylistsResponse: { // field return type
     isInWatchLater: boolean; // Boolean!
@@ -1067,7 +1067,7 @@ export interface NexusGenFieldTypeNames {
     node: 'Bookmark'
   }
   CalculateTipsResult: { // field return type name
-    tips: 'Int'
+    tips: 'String'
   }
   CheckPublishPlaylistsResponse: { // field return type name
     isInWatchLater: 'Boolean'
