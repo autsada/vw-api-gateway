@@ -807,7 +807,7 @@ export const PlaylistMutation = extendType({
   type: "Mutation",
   definition(t) {
     /**
-     * Add a publish to new playlist
+     * Add a publish to non-existing playlist
      */
     t.field("addToNewPlaylist", {
       type: "WriteResult",
