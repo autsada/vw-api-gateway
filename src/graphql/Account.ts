@@ -19,6 +19,7 @@ import {
   badInputErrMessage,
   unauthorizedErrMessage,
   badRequestErrMessage,
+  notFoundErrMessage,
 } from "./Error"
 import { recoverAddress, validateAuthenticity } from "../lib"
 
@@ -230,19 +231,33 @@ export const AccountMutation = extendType({
       args: { input: nonNull("CacheSessionInput") },
       async resolve(_parent, { input }, { dataSources, prisma, signature }) {
         try {
+          // Validate input
           if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
           const { address, profileId, accountId } = input
           if (!address || !profileId || !accountId)
             throwError(badInputErrMessage, "BAD_USER_INPUT")
 
-          // Validate authentication/authorization
-          await validateAuthenticity({
+          // Validate authentication/authorization of the sender
+          const account = await validateAuthenticity({
             accountId,
             owner: address,
             dataSources,
             prisma,
             signature,
           })
+          if (!account) throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Get the profile
+          const profile = await prisma.profile.findUnique({
+            where: {
+              id: profileId,
+            },
+          })
+          if (!profile) throwError(notFoundErrMessage, "NOT_FOUND")
+
+          // Check ownership of the profile
+          if (account?.owner?.toLowerCase() !== profile?.owner?.toLowerCase())
+            throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
           await cacheLoggedInSession(input.address, input.profileId)
 
