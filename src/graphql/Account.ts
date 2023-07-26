@@ -176,7 +176,7 @@ export const AccountMutation = extendType({
             const owner = address.toLowerCase()
 
             // Create (if not exist)  an account in the database
-            const account = await prisma.account.upsert({
+            await prisma.account.upsert({
               where: {
                 owner,
               },
@@ -188,7 +188,11 @@ export const AccountMutation = extendType({
               update: {},
             })
 
-            return account
+            return prisma.account.findUnique({
+              where: {
+                owner,
+              },
+            })
           } else {
             // `WALLET` account
             if (!signature || accountType !== "WALLET")
@@ -207,7 +211,7 @@ export const AccountMutation = extendType({
             const owner = ownerAddress.toLowerCase()
 
             // Create (if not exist)  an account in the database
-            const account = await prisma.account.upsert({
+            await prisma.account.upsert({
               where: {
                 owner,
               },
@@ -218,7 +222,11 @@ export const AccountMutation = extendType({
               update: {},
             })
 
-            return account
+            return prisma.account.findUnique({
+              where: {
+                owner,
+              },
+            })
           }
         } catch (error) {
           throw error
