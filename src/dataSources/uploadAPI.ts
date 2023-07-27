@@ -37,7 +37,15 @@ export class UploadAPI extends RESTDataSource {
    * @param ref a storage path of the publish in cloud storage
    * @param publishId a publish id to be deleted
    */
-  async deleteFiles(ref: string, publishId: string): Promise<void> {
-    return this.post("upload/delete", { body: { ref, publishId } })
+  async deleteFiles(ref: string, publishId?: string): Promise<void> {
+    return this.post("upload/delete/files", { body: { ref, publishId } })
+  }
+
+  /**
+   * @dev A route to delete a file from cloud storage
+   * @param ref a storage path to the file
+   */
+  async deleteFile(ref: string): Promise<void> {
+    return this.post("upload/delete/file", { body: { ref } })
   }
 }
