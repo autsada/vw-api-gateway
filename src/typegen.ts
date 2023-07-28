@@ -351,6 +351,11 @@ export interface NexusGenInputs {
     title?: string | null; // String
     visibility?: NexusGenEnums['Visibility'] | null; // Visibility
   }
+  ValidateAuthInput: { // input type
+    accountId: string; // String!
+    owner: string; // String!
+    profileId: string; // String!
+  }
 }
 
 export interface NexusGenEnums {
@@ -619,6 +624,9 @@ export interface NexusGenObjects {
     senderId: string; // String!
     to: string; // String!
   }
+  ValidateAuthResult: { // root type
+    isAuthenticated: boolean; // Boolean!
+  }
   WatchLater: { // root type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     id: string; // ID!
@@ -837,6 +845,7 @@ export interface NexusGenFieldTypes {
     updateReadPreferences: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateVideo: NexusGenRootTypes['Publish'] | null; // Publish
     updateWatchPreferences: NexusGenRootTypes['WriteResult'] | null; // WriteResult
+    validateAuth: NexusGenRootTypes['ValidateAuthResult'] | null; // ValidateAuthResult
     validateName: boolean | null; // Boolean
   }
   PageInfo: { // field return type
@@ -1015,6 +1024,9 @@ export interface NexusGenFieldTypes {
     sender: NexusGenRootTypes['Profile']; // Profile!
     senderId: string; // String!
     to: string; // String!
+  }
+  ValidateAuthResult: { // field return type
+    isAuthenticated: boolean; // Boolean!
   }
   WatchLater: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -1226,6 +1238,7 @@ export interface NexusGenFieldTypeNames {
     updateReadPreferences: 'WriteResult'
     updateVideo: 'Publish'
     updateWatchPreferences: 'WriteResult'
+    validateAuth: 'ValidateAuthResult'
     validateName: 'Boolean'
   }
   PageInfo: { // field return type name
@@ -1405,6 +1418,9 @@ export interface NexusGenFieldTypeNames {
     senderId: 'String'
     to: 'String'
   }
+  ValidateAuthResult: { // field return type name
+    isAuthenticated: 'Boolean'
+  }
   WatchLater: { // field return type name
     createdAt: 'DateTime'
     id: 'ID'
@@ -1546,6 +1562,9 @@ export interface NexusGenArgTypes {
     }
     updateWatchPreferences: { // args
       input: NexusGenInputs['UpdatePreferencesInput']; // UpdatePreferencesInput!
+    }
+    validateAuth: { // args
+      input: NexusGenInputs['ValidateAuthInput']; // ValidateAuthInput!
     }
     validateName: { // args
       name: string; // String!

@@ -494,6 +494,7 @@ type Mutation {
   updateReadPreferences(input: UpdatePreferencesInput!): WriteResult
   updateVideo(input: UpdateVideoInput!): Publish
   updateWatchPreferences(input: UpdatePreferencesInput!): WriteResult
+  validateAuth(input: ValidateAuthInput!): ValidateAuthResult
   validateName(name: String!): Boolean
 }
 
@@ -872,6 +873,16 @@ input UpdateVideoInput {
   thumbnailType: ThumbnailType!
   title: String
   visibility: Visibility
+}
+
+input ValidateAuthInput {
+  accountId: String!
+  owner: String!
+  profileId: String!
+}
+
+type ValidateAuthResult {
+  isAuthenticated: Boolean!
 }
 
 enum Visibility {

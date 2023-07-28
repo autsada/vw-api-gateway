@@ -155,6 +155,22 @@ export const WriteResult = objectType({
   },
 })
 
+export const ValidateAuthInput = inputObjectType({
+  name: "ValidateAuthInput",
+  definition(t) {
+    t.nonNull.string("accountId")
+    t.nonNull.string("owner")
+    t.nonNull.string("profileId")
+  },
+})
+
+export const ValidateAuthResult = objectType({
+  name: "ValidateAuthResult",
+  definition(t) {
+    t.nonNull.boolean("isAuthenticated")
+  },
+})
+
 export const AccountMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -272,6 +288,46 @@ export const AccountMutation = extendType({
           return { status: "Ok" }
         } catch (error) {
           throw error
+        }
+      },
+    })
+
+    t.field("validateAuth", {
+      type: "ValidateAuthResult",
+      args: { input: nonNull("ValidateAuthInput") },
+      async resolve(_parent, { input }, { dataSources, prisma, signature }) {
+        try {
+          // Validate input
+          if (!input) return { isAuthenticated: false }
+          const { accountId, owner, profileId } = input
+          if (!accountId || !owner || !profileId)
+            return { isAuthenticated: false }
+
+          // Validate authentication/authorization of the sender
+          const account = await validateAuthenticity({
+            accountId,
+            owner,
+            dataSources,
+            prisma,
+            signature,
+          })
+          if (!account) return { isAuthenticated: false }
+
+          // Get the profile
+          const profile = await prisma.profile.findUnique({
+            where: {
+              id: profileId,
+            },
+          })
+          if (!profile) return { isAuthenticated: false }
+
+          // Check ownership of the profile
+          if (account?.owner?.toLowerCase() !== profile?.owner?.toLowerCase())
+            return { isAuthenticated: false }
+
+          return { isAuthenticated: true }
+        } catch (error) {
+          return { isAuthenticated: false }
         }
       },
     })
