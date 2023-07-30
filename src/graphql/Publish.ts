@@ -2144,6 +2144,47 @@ export const PublishQuery = extendType({
             })
           }
 
+          const count = await prisma.publish.count({
+            where: {
+              AND: [
+                {
+                  visibility: {
+                    equals: "public",
+                  },
+                },
+                {
+                  publishType:
+                    publishType === "videos"
+                      ? {
+                          equals: "Video",
+                        }
+                      : publishType === "shorts"
+                      ? {
+                          equals: "Short",
+                        }
+                      : publishType === "blogs"
+                      ? {
+                          equals: "Blog",
+                        }
+                      : undefined,
+                },
+                {
+                  uploading: false,
+                },
+                {
+                  creatorId: {
+                    notIn: dontRecommendsList,
+                  },
+                },
+                {
+                  tags: {
+                    search: tag,
+                  },
+                },
+              ],
+            },
+          })
+
           if (publishes.length === FETCH_QTY) {
             // Fetch result is equal to take quantity, so it has posibility that there are more to be fetched.
             const lastFetchedCursor = publishes[publishes.length - 1].id
@@ -2200,6 +2241,7 @@ export const PublishQuery = extendType({
 
             return {
               pageInfo: {
+                count,
                 endCursor: lastFetchedCursor,
                 hasNextPage: nextQuery.length > 0,
               },
@@ -2211,6 +2253,7 @@ export const PublishQuery = extendType({
           } else {
             return {
               pageInfo: {
+                count,
                 endCursor: null,
                 hasNextPage: false,
               },
@@ -2383,6 +2426,61 @@ export const PublishQuery = extendType({
             })
           }
 
+          const count = await prisma.publish.count({
+            where: {
+              AND: [
+                {
+                  visibility: {
+                    equals: "public",
+                  },
+                },
+                {
+                  publishType:
+                    publishType === "videos"
+                      ? {
+                          equals: "Video",
+                        }
+                      : publishType === "shorts"
+                      ? {
+                          equals: "Short",
+                        }
+                      : publishType === "blogs"
+                      ? {
+                          equals: "Blog",
+                        }
+                      : undefined,
+                },
+                {
+                  uploading: false,
+                },
+                {
+                  creatorId: {
+                    notIn: dontRecommendsList,
+                  },
+                },
+                {
+                  OR: [
+                    {
+                      tags: {
+                        search,
+                      },
+                    },
+                    {
+                      title: {
+                        search,
+                      },
+                    },
+                    {
+                      description: {
+                        search,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          })
+
           if (publishes.length === FETCH_QTY) {
             // Fetch result is equal to take quantity, so it has posibility that there are more to be fetched.
             const lastFetchedCursor = publishes[publishes.length - 1].id
@@ -2453,6 +2551,7 @@ export const PublishQuery = extendType({
 
             return {
               pageInfo: {
+                count,
                 endCursor: lastFetchedCursor,
                 hasNextPage: nextQuery.length > 0,
               },
@@ -2464,6 +2563,7 @@ export const PublishQuery = extendType({
           } else {
             return {
               pageInfo: {
+                count,
                 endCursor: null,
                 hasNextPage: false,
               },
