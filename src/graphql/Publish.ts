@@ -1083,10 +1083,11 @@ export const PublishQuery = extendType({
               edges: [],
             }
 
-          // Construct a search string from the publish tags for full text search
+          // Search string for full text search
           const search = publish.tags
-            ? publish.tags.split(" ").join(" | ")
-            : null
+            ?.split(" | ")
+            .map((tag) => tag.replaceAll(" ", "-"))
+            .join(" | ")
 
           let videos: PublishType[] = []
 
@@ -1412,6 +1413,7 @@ export const PublishQuery = extendType({
             }
           }
         } catch (error) {
+          console.log("error -->", error)
           throw error
         }
       },
@@ -1681,10 +1683,11 @@ export const PublishQuery = extendType({
               edges: [],
             }
 
-          // Construct a search string from the publish tags for full text search
+          // Search string for full text search
           const search = publish.tags
-            ? publish.tags.split(" ").join(" | ")
-            : null
+            ?.split(" | ")
+            .map((tag) => tag.replaceAll(" ", "-"))
+            .join(" | ")
 
           let blogs: PublishType[] = []
 
@@ -2254,7 +2257,7 @@ export const PublishQuery = extendType({
           const dontRecommendsList = dontRecommends.map((drc) => drc.targetId)
 
           // Convert tag to catory
-          const search = query.replaceAll(" ", " | ")
+          const search = query
 
           if (!cursor) {
             publishes = await prisma.publish.findMany({
