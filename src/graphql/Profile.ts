@@ -522,9 +522,9 @@ export const ProfileMutation = extendType({
             },
           })
 
-          // Delete the old file without waiting
+          // Delete the old image without waiting
           if (profile?.imageRef) {
-            dataSources.uploadAPI.deleteFile(profile.imageRef)
+            dataSources.uploadAPI.deleteImage(profile.imageRef)
           }
 
           return { status: "Ok" }
@@ -581,7 +581,7 @@ export const ProfileMutation = extendType({
 
           // Delete the old file without waiting
           if (profile?.bannerImageRef) {
-            dataSources.uploadAPI.deleteFile(profile.bannerImageRef)
+            dataSources.uploadAPI.deleteImage(profile.bannerImageRef)
           }
 
           return { status: "Ok" }

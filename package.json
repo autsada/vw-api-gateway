@@ -17,6 +17,7 @@
     "@apollo/server": "^4.8.1",
     "@apollo/utils.keyvaluecache": "^3.0.0",
     "@ethersproject/hash": "^5.7.0",
+    "@google-cloud/pubsub": "^3.7.3",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

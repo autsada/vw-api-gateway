@@ -3,9 +3,14 @@ import axios from "axios"
 
 import { prisma } from "../client"
 import { isValidAchemySignature } from "../lib"
+import { publishMessage } from "../listensers/pubsub"
 
-const { CLOUDFLAR_BASE_URL, CLOUDFLAR_API_TOKEN, CLOUDFLAR_ACCOUNT_ID } =
-  process.env
+const {
+  CLOUDFLAR_BASE_URL,
+  CLOUDFLAR_API_TOKEN,
+  CLOUDFLAR_ACCOUNT_ID,
+  PUBLISH_PROCESSING_TOPIC,
+} = process.env
 
 /**
  * This route will be called by Alchemy to notify when there is any activity occurred on an address
@@ -163,7 +168,8 @@ export async function onTranscodingFinished(req: Request, res: Response) {
         }
       }
 
-      // TODO: Inform the UIs
+      // Publish a message to pub/sub
+      await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
 
       res.status(200).end()
     }
@@ -185,6 +191,9 @@ export async function onTranscodingFinished(req: Request, res: Response) {
         },
       })
     }
+
+    // Publish a message to pub/sub
+    await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
 
     res.status(500).end()
   }

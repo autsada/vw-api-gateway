@@ -33,19 +33,24 @@ export class UploadAPI extends RESTDataSource {
   }
 
   /**
-   * @dev A route to delete a publish's files from cloud storage
-   * @param ref a storage path of the publish in cloud storage
+   * @dev A route to delete a publish's video files from cloud storage
+   * @param ref a storage path of the video files in cloud storage
    * @param publishId a publish id to be deleted
+   * @param videoId a playback video id that stored on Cloudflare stream
    */
-  async deleteFiles(ref: string, publishId?: string): Promise<void> {
-    return this.post("upload/delete/files", { body: { ref, publishId } })
+  async deleteVideo(
+    ref: string,
+    publishId: string,
+    videoId?: string
+  ): Promise<void> {
+    return this.delete("upload/video", { body: { ref, publishId, videoId } })
   }
 
   /**
-   * @dev A route to delete a file from cloud storage
-   * @param ref a storage path to the file
+   * @dev A route to delete an image from cloud storage
+   * @param ref a storage path to the image
    */
-  async deleteFile(ref: string): Promise<void> {
-    return this.post("upload/delete/file", { body: { ref } })
+  async deleteImage(ref: string): Promise<void> {
+    return this.delete("upload/image", { body: { ref } })
   }
 }

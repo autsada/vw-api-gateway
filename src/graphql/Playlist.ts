@@ -377,7 +377,6 @@ export const PlaylistQuery = extendType({
 
     /**
      * Fetch preview playlists
-     * Get the most updated 10 playlists
      */
     t.field("fetchPreviewPlaylists", {
       type: "FetchPreviewPlaylistsResponse",

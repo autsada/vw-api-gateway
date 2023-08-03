@@ -37,6 +37,9 @@ import {
   validateAuthenticity,
 } from "../lib"
 import { FETCH_QTY } from "../lib/constants"
+import { publishMessage } from "../listensers/pubsub"
+
+const { PUBLISH_PROCESSING_TOPIC } = process.env
 
 export const Category = enumType(CategoryEnum)
 export const PublishClasification = enumType(PublishTypeEnum)
@@ -2766,6 +2769,9 @@ export const PublishMutation = extendType({
             },
           })
 
+          // Publish a message to pub/sub
+          await publishMessage(PUBLISH_PROCESSING_TOPIC!, draft.id)
+
           return { id: draft.id, filename }
         } catch (error) {
           throw error
@@ -2818,6 +2824,9 @@ export const PublishMutation = extendType({
               thumbnailType: "custom",
             },
           })
+
+          // Publish a message to pub/sub
+          await publishMessage(PUBLISH_PROCESSING_TOPIC!, draft.id)
 
           return { id: draft.id }
         } catch (error) {
@@ -2918,6 +2927,10 @@ export const PublishMutation = extendType({
               updatedAt: new Date(),
             },
           })
+
+          // Publish a message to pub/sub
+          await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
+
           return publish
         } catch (error) {
           throw error
@@ -3073,6 +3086,10 @@ export const PublishMutation = extendType({
               },
             })
           }
+
+          // Publish a message to pub/sub
+          await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
+
           return { status: "Ok" }
         } catch (error) {
           throw error
@@ -3366,6 +3383,9 @@ export const PublishMutation = extendType({
             where: {
               id: publishId,
             },
+            include: {
+              playback: true,
+            },
           })
           if (!publish) throwError(notFoundErrMessage, "NOT_FOUND")
 
@@ -3374,12 +3394,13 @@ export const PublishMutation = extendType({
             throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
           // Call the Upload Service to delete the publish's files without waiting.
-          dataSources.uploadAPI.deleteFiles(
+          dataSources.uploadAPI.deleteVideo(
             `publishes/${creator?.name}/${publishId}/`,
-            publishId
+            publishId,
+            publish?.playback?.videoId
           )
 
-          // Update the publish status in the database to `deleting` so frontends can update their UIs
+          // Update the publish status in the database to `deleting`
           await prisma.publish.update({
             where: {
               id: publishId,
@@ -3388,6 +3409,9 @@ export const PublishMutation = extendType({
               deleting: true,
             },
           })
+
+          // At this point, the delete process is not finished yet, so we just publish a message to processing topic so the frontends can update their UIs.
+          await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
 
           return { status: "Ok" }
         } catch (error) {
