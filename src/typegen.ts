@@ -360,7 +360,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   AccountType: "TRADITIONAL" | "WALLET"
-  Category: "AI" | "Animals" | "Blockchain" | "Children" | "Education" | "Entertainment" | "Food" | "Gaming" | "LifeStyle" | "Men" | "Movies" | "Music" | "News" | "Other" | "Programming" | "Science" | "Sports" | "Technology" | "Travel" | "Vehicles" | "Women"
+  Category: "AI" | "Animals" | "Blockchain" | "Children" | "Drinks" | "Education" | "Entertainment" | "Food" | "Gaming" | "Health" | "History" | "LifeStyle" | "Men" | "Movies" | "Music" | "News" | "Other" | "Programming" | "Science" | "Sports" | "Technology" | "Travel" | "Vehicles" | "Women"
   CommentType: "COMMENT" | "PUBLISH"
   CommentsOrderBy: "counts" | "newest"
   PlaylistOrderBy: "newest" | "oldest"

@@ -79,10 +79,13 @@ enum Category {
   Entertainment
   Sports
   Food
+  Drinks
+  Health
   Travel
   Gaming
   News
   Animals
+  History
   Education
   Science
   Technology
