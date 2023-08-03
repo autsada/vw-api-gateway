@@ -321,6 +321,19 @@ input FetchMyPublishesInput {
   publishType: QueryPublishType
 }
 
+input FetchNotificationsInput {
+  accountId: String!
+  cursor: String
+  owner: String!
+  profileId: String!
+}
+
+type FetchNotificationsResponse {
+  edges: [NotificationEdge!]!
+  pageInfo: PageInfo!
+  unread: Int
+}
+
 input FetchPlaylistItemsInput {
   accountId: String!
   cursor: String
@@ -501,6 +514,30 @@ type Mutation {
   validateName(name: String!): Boolean
 }
 
+type Notification {
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  profile: Profile!
+  profileId: String!
+  receiver: Profile!
+  receiverId: String!
+  status: ReadStatus!
+}
+
+type NotificationEdge {
+  cursor: String
+  node: Notification
+}
+
+enum NotificationType {
+  FOLLOW
+  LIKE
+  NEW_RELEASE
+  OTHER
+  TIP
+}
+
 type PageInfo {
   count: Int
   endCursor: String
@@ -661,6 +698,7 @@ type Query {
   fetchBookmarks(input: FetchBookmarkInput!): FetchBookmarkResponse
   fetchCommentsByPublishId(input: FetchCommentsByPublishIdInput!): FetchCommentsResponse
   fetchDontRecommends(input: FetchDontRecommendsInput!): FetchDontRecommendsResponse
+  fetchMyNotifications(input: FetchNotificationsInput!): FetchNotificationsResponse
   fetchMyPlaylists(input: FetchMyPlaylistsInput!): FetchPlaylistsResponse
   fetchMyPublishes(input: FetchMyPublishesInput!): FetchPublishesResponse
   fetchPlaylistItems(input: FetchPlaylistItemsInput!): FetchPlaylistItemsResponse
@@ -700,6 +738,11 @@ enum QueryPublishType {
   blogs
   shorts
   videos
+}
+
+enum ReadStatus {
+  read
+  unread
 }
 
 input RemoveAllBookmarksInput {

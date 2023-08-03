@@ -6,6 +6,7 @@ import { prisma as prismaClient } from "../client"
 import { WalletAPI } from "../dataSources/walletAPI"
 import { throwError, unauthorizedErrMessage } from "../graphql/Error"
 import { hashMessage } from "@ethersproject/hash"
+import { NexusGenEnums } from "../typegen"
 
 const { ALCHEMY_WEBHOOK_SIGNING_KEY, MESSAGE } = process.env
 
@@ -127,4 +128,33 @@ export function calucateReadingTime(text: string) {
 export function getPostExcerpt(str: string, len = 200) {
   const cleanText = getCleanText(str)
   return _.truncate(cleanText, { length: len, separator: /,?\.* +/ }) // separate by spaces, including preceding commas and periods
+}
+
+export function createFollowNotiContent(followingName: string) {
+  return `@${followingName} just follows you.`
+}
+
+/**
+ * @param profileName Name of the profile that likes a publish
+ * @returns
+ */
+export function createLikeNotiContent(
+  profileName: string,
+  publishTitle: string,
+  publishType: NexusGenEnums["PublishType"]
+) {
+  return `@${profileName} likes your ${publishType.toLowerCase()}:${publishTitle}`
+}
+
+/**
+ * @param profileName Name of the profile that likes a publish
+ * @returns
+ */
+export function createTipNotiContent(
+  profileName: string,
+  amount: number,
+  publishTitle: string,
+  publishType: NexusGenEnums["PublishType"]
+) {
+  return `@${profileName} just sent you a tips (${amount}) for your ${publishType.toLowerCase()}:${publishTitle}`
 }

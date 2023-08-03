@@ -149,6 +149,12 @@ export interface NexusGenInputs {
     owner: string; // String!
     publishType?: NexusGenEnums['QueryPublishType'] | null; // QueryPublishType
   }
+  FetchNotificationsInput: { // input type
+    accountId: string; // String!
+    cursor?: string | null; // String
+    owner: string; // String!
+    profileId: string; // String!
+  }
   FetchPlaylistItemsInput: { // input type
     accountId: string; // String!
     cursor?: string | null; // String
@@ -363,10 +369,12 @@ export interface NexusGenEnums {
   Category: "AI" | "Animals" | "Blockchain" | "Children" | "Drinks" | "Education" | "Entertainment" | "Food" | "Gaming" | "Health" | "History" | "LifeStyle" | "Men" | "Movies" | "Music" | "News" | "Other" | "Programming" | "Science" | "Sports" | "Technology" | "Travel" | "Vehicles" | "Women"
   CommentType: "COMMENT" | "PUBLISH"
   CommentsOrderBy: "counts" | "newest"
+  NotificationType: "FOLLOW" | "LIKE" | "NEW_RELEASE" | "OTHER" | "TIP"
   PlaylistOrderBy: "newest" | "oldest"
   PublishOrderBy: "latest" | "popular"
   PublishType: "Ads" | "Blog" | "Podcast" | "Short" | "Video"
   QueryPublishType: "ads" | "all" | "blogs" | "shorts" | "videos"
+  ReadStatus: "read" | "unread"
   ReportReason: "abuse" | "adult" | "harass" | "harmful" | "hateful" | "mislead" | "spam" | "terrorism" | "violent"
   ThumbnailType: "custom" | "generated"
   Visibility: "draft" | "private" | "public"
@@ -475,6 +483,11 @@ export interface NexusGenObjects {
     edges: NexusGenRootTypes['DontRecommendEdge'][]; // [DontRecommendEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
+  FetchNotificationsResponse: { // root type
+    edges: NexusGenRootTypes['NotificationEdge'][]; // [NotificationEdge!]!
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+    unread?: number | null; // Int
+  }
   FetchPlaylistItemsResponse: { // root type
     edges: NexusGenRootTypes['PlaylistItemEdge'][]; // [PlaylistItemEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
@@ -507,6 +520,18 @@ export interface NexusGenObjects {
     publishId: string; // String!
   }
   Mutation: {};
+  Notification: { // root type
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // ID!
+    profileId: string; // String!
+    receiverId: string; // String!
+    status: NexusGenEnums['ReadStatus']; // ReadStatus!
+  }
+  NotificationEdge: { // root type
+    cursor?: string | null; // String
+    node?: NexusGenRootTypes['Notification'] | null; // Notification
+  }
   PageInfo: { // root type
     count?: number | null; // Int
     endCursor?: string | null; // String
@@ -768,6 +793,11 @@ export interface NexusGenFieldTypes {
     edges: NexusGenRootTypes['DontRecommendEdge'][]; // [DontRecommendEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
+  FetchNotificationsResponse: { // field return type
+    edges: NexusGenRootTypes['NotificationEdge'][]; // [NotificationEdge!]!
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+    unread: number | null; // Int
+  }
   FetchPlaylistItemsResponse: { // field return type
     edges: NexusGenRootTypes['PlaylistItemEdge'][]; // [PlaylistItemEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
@@ -847,6 +877,20 @@ export interface NexusGenFieldTypes {
     updateWatchPreferences: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     validateAuth: NexusGenRootTypes['ValidateAuthResult'] | null; // ValidateAuthResult
     validateName: boolean | null; // Boolean
+  }
+  Notification: { // field return type
+    content: string; // String!
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // ID!
+    profile: NexusGenRootTypes['Profile']; // Profile!
+    profileId: string; // String!
+    receiver: NexusGenRootTypes['Profile']; // Profile!
+    receiverId: string; // String!
+    status: NexusGenEnums['ReadStatus']; // ReadStatus!
+  }
+  NotificationEdge: { // field return type
+    cursor: string | null; // String
+    node: NexusGenRootTypes['Notification'] | null; // Notification
   }
   PageInfo: { // field return type
     count: number | null; // Int
@@ -974,6 +1018,7 @@ export interface NexusGenFieldTypes {
     fetchBookmarks: NexusGenRootTypes['FetchBookmarkResponse'] | null; // FetchBookmarkResponse
     fetchCommentsByPublishId: NexusGenRootTypes['FetchCommentsResponse'] | null; // FetchCommentsResponse
     fetchDontRecommends: NexusGenRootTypes['FetchDontRecommendsResponse'] | null; // FetchDontRecommendsResponse
+    fetchMyNotifications: NexusGenRootTypes['FetchNotificationsResponse'] | null; // FetchNotificationsResponse
     fetchMyPlaylists: NexusGenRootTypes['FetchPlaylistsResponse'] | null; // FetchPlaylistsResponse
     fetchMyPublishes: NexusGenRootTypes['FetchPublishesResponse'] | null; // FetchPublishesResponse
     fetchPlaylistItems: NexusGenRootTypes['FetchPlaylistItemsResponse'] | null; // FetchPlaylistItemsResponse
@@ -1161,6 +1206,11 @@ export interface NexusGenFieldTypeNames {
     edges: 'DontRecommendEdge'
     pageInfo: 'PageInfo'
   }
+  FetchNotificationsResponse: { // field return type name
+    edges: 'NotificationEdge'
+    pageInfo: 'PageInfo'
+    unread: 'Int'
+  }
   FetchPlaylistItemsResponse: { // field return type name
     edges: 'PlaylistItemEdge'
     pageInfo: 'PageInfo'
@@ -1240,6 +1290,20 @@ export interface NexusGenFieldTypeNames {
     updateWatchPreferences: 'WriteResult'
     validateAuth: 'ValidateAuthResult'
     validateName: 'Boolean'
+  }
+  Notification: { // field return type name
+    content: 'String'
+    createdAt: 'DateTime'
+    id: 'ID'
+    profile: 'Profile'
+    profileId: 'String'
+    receiver: 'Profile'
+    receiverId: 'String'
+    status: 'ReadStatus'
+  }
+  NotificationEdge: { // field return type name
+    cursor: 'String'
+    node: 'Notification'
   }
   PageInfo: { // field return type name
     count: 'Int'
@@ -1367,6 +1431,7 @@ export interface NexusGenFieldTypeNames {
     fetchBookmarks: 'FetchBookmarkResponse'
     fetchCommentsByPublishId: 'FetchCommentsResponse'
     fetchDontRecommends: 'FetchDontRecommendsResponse'
+    fetchMyNotifications: 'FetchNotificationsResponse'
     fetchMyPlaylists: 'FetchPlaylistsResponse'
     fetchMyPublishes: 'FetchPublishesResponse'
     fetchPlaylistItems: 'FetchPlaylistItemsResponse'
@@ -1582,6 +1647,9 @@ export interface NexusGenArgTypes {
     }
     fetchDontRecommends: { // args
       input: NexusGenInputs['FetchDontRecommendsInput']; // FetchDontRecommendsInput!
+    }
+    fetchMyNotifications: { // args
+      input: NexusGenInputs['FetchNotificationsInput']; // FetchNotificationsInput!
     }
     fetchMyPlaylists: { // args
       input: NexusGenInputs['FetchMyPlaylistsInput']; // FetchMyPlaylistsInput!

@@ -33,13 +33,14 @@ import {
 } from "./Error"
 import {
   calucateReadingTime,
+  createLikeNotiContent,
   getPostExcerpt,
   validateAuthenticity,
 } from "../lib"
 import { FETCH_QTY } from "../lib/constants"
 import { publishMessage } from "../listensers/pubsub"
 
-const { PUBLISH_PROCESSING_TOPIC } = process.env
+const { PUBLISH_PROCESSING_TOPIC, NEW_NOTIFICATION_TOPIC } = process.env
 
 export const Category = enumType(CategoryEnum)
 export const PublishClasification = enumType(PublishTypeEnum)
@@ -3180,6 +3181,23 @@ export const PublishMutation = extendType({
                 },
               })
             }
+
+            // Create a notification
+            await prisma.notification.create({
+              data: {
+                profileId,
+                receiverId: publish?.creatorId!,
+                type: "LIKE",
+                content: createLikeNotiContent(
+                  profile?.name!,
+                  publish?.title!,
+                  publish?.publishType!
+                ),
+              },
+            })
+
+            // Publish a message to pub/sub
+            await publishMessage(NEW_NOTIFICATION_TOPIC!, publish?.creatorId!)
           } else {
             // Undo Like case
             await prisma.like.delete({
@@ -3191,8 +3209,6 @@ export const PublishMutation = extendType({
               },
             })
           }
-
-          // TODO: Inform the UIs
 
           return { status: "Ok" }
         } catch (error) {

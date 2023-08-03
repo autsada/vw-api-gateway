@@ -8,7 +8,14 @@ import {
   unauthorizedErrMessage,
   notFoundErrMessage,
 } from "./Error"
-import { generateColor, validateAuthenticity } from "../lib"
+import {
+  createFollowNotiContent,
+  generateColor,
+  validateAuthenticity,
+} from "../lib"
+import { publishMessage } from "../listensers/pubsub"
+
+const { NEW_NOTIFICATION_TOPIC } = process.env
 
 export const Follow = objectType({
   name: FollowModel.$name,
@@ -652,6 +659,19 @@ export const ProfileMutation = extendType({
                 followerId,
               },
             })
+
+            // Create a notification
+            await prisma.notification.create({
+              data: {
+                profileId,
+                receiverId: followerId,
+                type: "FOLLOW",
+                content: createFollowNotiContent(following?.name!),
+              },
+            })
+
+            // Publish a message to pub/sub
+            await publishMessage(NEW_NOTIFICATION_TOPIC!, followerId!)
           } else {
             // UnFollow case: delete the follow
             await prisma.follow.delete({

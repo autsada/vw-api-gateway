@@ -31,36 +31,38 @@ model Account {
 }
 
 model Profile {
-  id               String           @id @default(cuid())
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime?
-  owner            String // EOA Address
-  name             String           @unique @db.VarChar(64)
-  displayName      String           @db.VarChar(64)
-  image            String? // Image url
-  imageRef         String? // Image storage ref 
-  bannerImage      String?
-  bannerImageRef   String?
-  defaultColor     String?
-  accountId        String
-  account          Account          @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  followers        Follow[]         @relation("Follower")
-  following        Follow[]         @relation("Following")
-  watchPreferences Category[]       @default([])
-  readPreferences  Category[]       @default([])
-  publishes        Publish[]
-  likes            Like[]
-  disLikes         DisLike[]
-  sentTips         Tip[]            @relation("Sent")
-  receivedTips     Tip[]            @relation("Received")
-  comments         Comment[]
-  commentLikes     CommentLike[]
-  commentDisLikes  CommentDisLike[]
-  watchLater       WatchLater[]
-  playlists        Playlist[]
-  dontRecommends   DontRecommend[]
-  reports          Report[]
-  bookmarks        Bookmark[]
+  id                    String           @id @default(cuid())
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime?
+  owner                 String // EOA Address
+  name                  String           @unique @db.VarChar(64)
+  displayName           String           @db.VarChar(64)
+  image                 String? // Image url
+  imageRef              String? // Image storage ref 
+  bannerImage           String?
+  bannerImageRef        String?
+  defaultColor          String?
+  accountId             String
+  account               Account          @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  followers             Follow[]         @relation("Follower")
+  following             Follow[]         @relation("Following")
+  watchPreferences      Category[]       @default([])
+  readPreferences       Category[]       @default([])
+  publishes             Publish[]
+  likes                 Like[]
+  disLikes              DisLike[]
+  sentTips              Tip[]            @relation("Sent")
+  receivedTips          Tip[]            @relation("Received")
+  comments              Comment[]
+  commentLikes          CommentLike[]
+  commentDisLikes       CommentDisLike[]
+  watchLater            WatchLater[]
+  playlists             Playlist[]
+  dontRecommends        DontRecommend[]
+  reports               Report[]
+  bookmarks             Bookmark[]
+  notificationsSent     Notification[]   @relation("Sender")
+  notificationsReceived Notification[]   @relation("Receiver")
 }
 
 model Follow {
@@ -347,4 +349,29 @@ model Bookmark {
   publishId String
 
   @@unique(fields: [profileId, publishId], name: "identifier")
+}
+
+enum NotificationType {
+  FOLLOW
+  LIKE
+  TIP
+  NEW_RELEASE
+  OTHER
+}
+
+enum ReadStatus {
+  read
+  unread
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  createdAt  DateTime         @default(now())
+  type       NotificationType
+  profileId  String // An id of the profile that perform an action that causes a creation of the notification
+  profile    Profile          @relation("Sender", fields: [profileId], references: [id], onDelete: Cascade)
+  receiverId String // A profile id to which the notification should be sent to
+  receiver   Profile          @relation("Receiver", fields: [receiverId], references: [id])
+  content    String           @db.VarChar(2000)
+  status     ReadStatus       @default(unread)
 }
