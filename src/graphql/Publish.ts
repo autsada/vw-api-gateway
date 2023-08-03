@@ -3393,25 +3393,44 @@ export const PublishMutation = extendType({
           if (publish?.creatorId !== creatorId)
             throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
-          // Call the Upload Service to delete the publish's files without waiting.
-          dataSources.uploadAPI.deleteVideo(
-            `publishes/${creator?.name}/${publishId}/`,
-            publishId,
-            publish?.playback?.videoId
-          )
+          if (
+            publish?.publishType === "Video" ||
+            publish?.publishType === "Short"
+          ) {
+            // For video
+            // It might take a long time to delete the video files so we update the status in the database first.
+            // Update the publish status in the database to `deleting`
+            await prisma.publish.update({
+              where: {
+                id: publishId,
+              },
+              data: {
+                deleting: true,
+              },
+            })
 
-          // Update the publish status in the database to `deleting`
-          await prisma.publish.update({
-            where: {
-              id: publishId,
-            },
-            data: {
-              deleting: true,
-            },
-          })
+            // Call the Upload Service to delete the publish's files without waiting.
+            dataSources.uploadAPI.deleteVideo(
+              `publishes/${creator?.name}/${publishId}/`,
+              publishId,
+              publish?.playback?.videoId
+            )
 
-          // At this point, the delete process is not finished yet, so we just publish a message to processing topic so the frontends can update their UIs.
-          await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
+            // Publish a message to processing topic to pubsub.
+            await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
+          } else if (publish?.publishType === "Blog") {
+            // For blog
+            // It should just seconds to delete the cover image, so we can immediately delete the publish in the database.
+            if (publish.thumbnailRef) {
+              dataSources.uploadAPI.deleteImage(publish.thumbnailRef)
+            }
+
+            await prisma.publish.delete({
+              where: {
+                id: publishId,
+              },
+            })
+          }
 
           return { status: "Ok" }
         } catch (error) {
