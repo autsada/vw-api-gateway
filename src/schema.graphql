@@ -541,6 +541,7 @@ type NotificationEdge {
 }
 
 enum NotificationType {
+  COMMENT
   FOLLOW
   LIKE
   NEW_RELEASE

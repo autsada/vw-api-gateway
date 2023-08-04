@@ -33,7 +33,7 @@ import {
 } from "./Error"
 import {
   calucateReadingTime,
-  createLikeNotiContent,
+  createLikePublishNotiContent,
   getPostExcerpt,
   validateAuthenticity,
 } from "../lib"
@@ -3187,7 +3187,7 @@ export const PublishMutation = extendType({
                 profileId,
                 receiverId: publish?.creatorId!,
                 type: "LIKE",
-                content: createLikeNotiContent(
+                content: createLikePublishNotiContent(
                   profile?.name!,
                   publish?.title!,
                   publish?.publishType!
@@ -3195,8 +3195,11 @@ export const PublishMutation = extendType({
               },
             })
 
-            // Publish a message to pub/sub
+            // Publish a message to the notification topic pub/sub
             await publishMessage(NEW_NOTIFICATION_TOPIC!, publish?.creatorId!)
+
+            // Publish a message to the publish processing topic pub/sub
+            await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
           } else {
             // Undo Like case
             await prisma.like.delete({

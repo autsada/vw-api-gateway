@@ -138,12 +138,32 @@ export function createFollowNotiContent(followingName: string) {
  * @param profileName Name of the profile that likes a publish
  * @returns
  */
-export function createLikeNotiContent(
+export function createLikePublishNotiContent(
   profileName: string,
   publishTitle: string,
   publishType: NexusGenEnums["PublishType"]
 ) {
   return `@${profileName} likes your ${publishType.toLowerCase()}: ${publishTitle}.`
+}
+
+/**
+ * @param profileName Name of the profile who made the comment
+ * @returns
+ */
+export function createCommentNotiContent(
+  profileName: string,
+  publishTitle: string,
+  publishType: NexusGenEnums["PublishType"]
+) {
+  return `@${profileName} comments on your ${publishType.toLowerCase()}: ${publishTitle}.`
+}
+
+/**
+ * @param profileName Name of the profile that likes a comment
+ * @returns
+ */
+export function createLikeCommentNotiContent(profileName: string) {
+  return `@${profileName} likes your comment.`
 }
 
 /**

@@ -19,9 +19,17 @@ import {
   notFoundErrMessage,
   unauthorizedErrMessage,
 } from "./Error"
-import { countWords, validateAuthenticity } from "../lib"
+import {
+  countWords,
+  validateAuthenticity,
+  createLikeCommentNotiContent,
+  createCommentNotiContent,
+} from "../lib"
 import { FETCH_QTY } from "../lib/constants"
+import { publishMessage } from "../listensers/pubsub"
 import type { NexusGenInputs } from "../typegen"
+
+const { PUBLISH_PROCESSING_TOPIC, NEW_NOTIFICATION_TOPIC } = process.env
 
 export const CommentType = enumType(CommentTypeEnum)
 
@@ -629,6 +637,26 @@ export const CommentMutation = extendType({
             })
           }
 
+          // Create a notification
+          await prisma.notification.create({
+            data: {
+              profileId,
+              receiverId: publish?.creatorId!,
+              type: "COMMENT",
+              content: createCommentNotiContent(
+                profile?.name!,
+                publish?.title!,
+                publish?.publishType!
+              ),
+            },
+          })
+
+          // Publish a message to notification pub/sub
+          await publishMessage(NEW_NOTIFICATION_TOPIC!, publish?.creatorId!)
+
+          // Publish a message to publish processing topic pub/sub
+          await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
+
           return { status: "Ok" }
         } catch (error) {
           throw error
@@ -718,6 +746,19 @@ export const CommentMutation = extendType({
                 },
               })
             }
+
+            // Create a notification
+            await prisma.notification.create({
+              data: {
+                profileId,
+                receiverId: comment?.creatorId!,
+                type: "LIKE",
+                content: createLikeCommentNotiContent(profile?.name!),
+              },
+            })
+
+            // Publish a message to pub/sub
+            await publishMessage(NEW_NOTIFICATION_TOPIC!, comment?.creatorId!)
           } else {
             // Undo Like case
             await prisma.commentLike.delete({
@@ -729,8 +770,6 @@ export const CommentMutation = extendType({
               },
             })
           }
-
-          // TODO: Inform the UIs
 
           return { status: "Ok" }
         } catch (error) {
@@ -832,8 +871,6 @@ export const CommentMutation = extendType({
               },
             })
           }
-
-          // TODO: Inform the UIs
 
           return { status: "Ok" }
         } catch (error) {

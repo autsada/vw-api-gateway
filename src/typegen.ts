@@ -380,7 +380,7 @@ export interface NexusGenEnums {
   Category: "AI" | "Animals" | "Blockchain" | "Children" | "Drinks" | "Education" | "Entertainment" | "Food" | "Gaming" | "Health" | "History" | "LifeStyle" | "Men" | "Movies" | "Music" | "News" | "Other" | "Programming" | "Science" | "Sports" | "Technology" | "Travel" | "Vehicles" | "Women"
   CommentType: "COMMENT" | "PUBLISH"
   CommentsOrderBy: "counts" | "newest"
-  NotificationType: "FOLLOW" | "LIKE" | "NEW_RELEASE" | "OTHER" | "TIP"
+  NotificationType: "COMMENT" | "FOLLOW" | "LIKE" | "NEW_RELEASE" | "OTHER" | "TIP"
   PlaylistOrderBy: "newest" | "oldest"
   PublishOrderBy: "latest" | "popular"
   PublishType: "Ads" | "Blog" | "Podcast" | "Short" | "Video"

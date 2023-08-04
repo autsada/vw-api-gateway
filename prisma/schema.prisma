@@ -354,6 +354,7 @@ model Bookmark {
 enum NotificationType {
   FOLLOW
   LIKE
+  COMMENT
   TIP
   NEW_RELEASE
   OTHER
