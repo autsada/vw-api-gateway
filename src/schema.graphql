@@ -331,7 +331,6 @@ input FetchNotificationsInput {
 type FetchNotificationsResponse {
   edges: [NotificationEdge!]!
   pageInfo: PageInfo!
-  unread: Int
 }
 
 input FetchPlaylistItemsInput {
@@ -443,6 +442,16 @@ input GetMyAccountInput {
   accountType: AccountType!
 }
 
+input GetUnReadNotificationsInput {
+  accountId: String!
+  owner: String!
+  profileId: String!
+}
+
+type GetUnReadNotificationsResponse {
+  unread: Int!
+}
+
 scalar Json
 
 type Like {
@@ -503,6 +512,7 @@ type Mutation {
   updateBlog(input: UpdateBlogInput!): WriteResult
   updateDisplayName(input: UpdateNameInput!): WriteResult
   updateName(input: UpdateNameInput!): WriteResult
+  updateNotificationsStatus(input: UpdateNotificationsInput!): WriteResult
   updatePlaylistDescription(input: UpdatePlaylistDescriptionInput!): WriteResult
   updatePlaylistName(input: UpdatePlaylistNameInput!): WriteResult
   updatePlaylists(input: UpdatePlaylistsInput!): WriteResult
@@ -720,6 +730,7 @@ type Query {
   getProfileByName(input: QueryByNameInput!): Profile
   getPublishById(input: QueryByIdInput!): Publish
   getShort(input: QueryByIdInput!): Publish
+  getUnReadNotifications(input: GetUnReadNotificationsInput!): GetUnReadNotificationsResponse
 }
 
 input QueryByIdInput {
@@ -868,6 +879,13 @@ input UpdateImageInput {
 input UpdateNameInput {
   accountId: String!
   newName: String!
+  owner: String!
+  profileId: String!
+}
+
+input UpdateNotificationsInput {
+  accountId: String!
+  ids: [String!]!
   owner: String!
   profileId: String!
 }

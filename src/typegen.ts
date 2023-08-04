@@ -219,6 +219,11 @@ export interface NexusGenInputs {
   GetMyAccountInput: { // input type
     accountType: NexusGenEnums['AccountType']; // AccountType!
   }
+  GetUnReadNotificationsInput: { // input type
+    accountId: string; // String!
+    owner: string; // String!
+    profileId: string; // String!
+  }
   LikeCommentInput: { // input type
     accountId: string; // String!
     commentId: string; // String!
@@ -310,6 +315,12 @@ export interface NexusGenInputs {
   UpdateNameInput: { // input type
     accountId: string; // String!
     newName: string; // String!
+    owner: string; // String!
+    profileId: string; // String!
+  }
+  UpdateNotificationsInput: { // input type
+    accountId: string; // String!
+    ids: string[]; // [String!]!
     owner: string; // String!
     profileId: string; // String!
   }
@@ -486,7 +497,6 @@ export interface NexusGenObjects {
   FetchNotificationsResponse: { // root type
     edges: NexusGenRootTypes['NotificationEdge'][]; // [NotificationEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-    unread?: number | null; // Int
   }
   FetchPlaylistItemsResponse: { // root type
     edges: NexusGenRootTypes['PlaylistItemEdge'][]; // [PlaylistItemEdge!]!
@@ -513,6 +523,9 @@ export interface NexusGenObjects {
   Follow: { // root type
     followerId: string; // String!
     followingId: string; // String!
+  }
+  GetUnReadNotificationsResponse: { // root type
+    unread: number; // Int!
   }
   Like: { // root type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -796,7 +809,6 @@ export interface NexusGenFieldTypes {
   FetchNotificationsResponse: { // field return type
     edges: NexusGenRootTypes['NotificationEdge'][]; // [NotificationEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
-    unread: number | null; // Int
   }
   FetchPlaylistItemsResponse: { // field return type
     edges: NexusGenRootTypes['PlaylistItemEdge'][]; // [PlaylistItemEdge!]!
@@ -825,6 +837,9 @@ export interface NexusGenFieldTypes {
     followerId: string; // String!
     following: NexusGenRootTypes['Profile']; // Profile!
     followingId: string; // String!
+  }
+  GetUnReadNotificationsResponse: { // field return type
+    unread: number; // Int!
   }
   Like: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -868,6 +883,7 @@ export interface NexusGenFieldTypes {
     updateBlog: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateDisplayName: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateName: NexusGenRootTypes['WriteResult'] | null; // WriteResult
+    updateNotificationsStatus: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updatePlaylistDescription: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updatePlaylistName: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updatePlaylists: NexusGenRootTypes['WriteResult'] | null; // WriteResult
@@ -1040,6 +1056,7 @@ export interface NexusGenFieldTypes {
     getProfileByName: NexusGenRootTypes['Profile'] | null; // Profile
     getPublishById: NexusGenRootTypes['Publish'] | null; // Publish
     getShort: NexusGenRootTypes['Publish'] | null; // Publish
+    getUnReadNotifications: NexusGenRootTypes['GetUnReadNotificationsResponse'] | null; // GetUnReadNotificationsResponse
   }
   Report: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -1209,7 +1226,6 @@ export interface NexusGenFieldTypeNames {
   FetchNotificationsResponse: { // field return type name
     edges: 'NotificationEdge'
     pageInfo: 'PageInfo'
-    unread: 'Int'
   }
   FetchPlaylistItemsResponse: { // field return type name
     edges: 'PlaylistItemEdge'
@@ -1238,6 +1254,9 @@ export interface NexusGenFieldTypeNames {
     followerId: 'String'
     following: 'Profile'
     followingId: 'String'
+  }
+  GetUnReadNotificationsResponse: { // field return type name
+    unread: 'Int'
   }
   Like: { // field return type name
     createdAt: 'DateTime'
@@ -1281,6 +1300,7 @@ export interface NexusGenFieldTypeNames {
     updateBlog: 'WriteResult'
     updateDisplayName: 'WriteResult'
     updateName: 'WriteResult'
+    updateNotificationsStatus: 'WriteResult'
     updatePlaylistDescription: 'WriteResult'
     updatePlaylistName: 'WriteResult'
     updatePlaylists: 'WriteResult'
@@ -1453,6 +1473,7 @@ export interface NexusGenFieldTypeNames {
     getProfileByName: 'Profile'
     getPublishById: 'Publish'
     getShort: 'Publish'
+    getUnReadNotifications: 'GetUnReadNotificationsResponse'
   }
   Report: { // field return type name
     createdAt: 'DateTime'
@@ -1607,6 +1628,9 @@ export interface NexusGenArgTypes {
     updateName: { // args
       input: NexusGenInputs['UpdateNameInput']; // UpdateNameInput!
     }
+    updateNotificationsStatus: { // args
+      input: NexusGenInputs['UpdateNotificationsInput']; // UpdateNotificationsInput!
+    }
     updatePlaylistDescription: { // args
       input: NexusGenInputs['UpdatePlaylistDescriptionInput']; // UpdatePlaylistDescriptionInput!
     }
@@ -1713,6 +1737,9 @@ export interface NexusGenArgTypes {
     }
     getShort: { // args
       input: NexusGenInputs['QueryByIdInput']; // QueryByIdInput!
+    }
+    getUnReadNotifications: { // args
+      input: NexusGenInputs['GetUnReadNotificationsInput']; // GetUnReadNotificationsInput!
     }
   }
 }

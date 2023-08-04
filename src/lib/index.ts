@@ -143,7 +143,7 @@ export function createLikeNotiContent(
   publishTitle: string,
   publishType: NexusGenEnums["PublishType"]
 ) {
-  return `@${profileName} likes your ${publishType.toLowerCase()}:${publishTitle}`
+  return `@${profileName} likes your ${publishType.toLowerCase()}: ${publishTitle}.`
 }
 
 /**
@@ -156,5 +156,5 @@ export function createTipNotiContent(
   publishTitle: string,
   publishType: NexusGenEnums["PublishType"]
 ) {
-  return `@${profileName} just sent you a tips (${amount}) for your ${publishType.toLowerCase()}:${publishTitle}`
+  return `@${profileName} just sent you a tips (${amount}) for your ${publishType.toLowerCase()}: ${publishTitle}.`
 }
