@@ -306,6 +306,18 @@ type FetchDontRecommendsResponse {
   pageInfo: PageInfo!
 }
 
+input FetchFollowsInput {
+  accountId: String!
+  cursor: String
+  owner: String!
+  requestorId: String!
+}
+
+type FetchFollowsResponse {
+  edges: [FollowEdge!]!
+  pageInfo: PageInfo!
+}
+
 input FetchMyPlaylistsInput {
   accountId: String!
   cursor: String
@@ -429,6 +441,12 @@ type Follow {
   followerId: String!
   following: Profile!
   followingId: String!
+  id: String!
+}
+
+type FollowEdge {
+  cursor: String
+  node: Follow
 }
 
 input FollowInput {
@@ -709,6 +727,8 @@ type Query {
   fetchBookmarks(input: FetchBookmarkInput!): FetchBookmarkResponse
   fetchCommentsByPublishId(input: FetchCommentsByPublishIdInput!): FetchCommentsResponse
   fetchDontRecommends(input: FetchDontRecommendsInput!): FetchDontRecommendsResponse
+  fetchMyFollowers(input: FetchFollowsInput!): FetchFollowsResponse
+  fetchMyFollowing(input: FetchFollowsInput!): FetchFollowsResponse
   fetchMyNotifications(input: FetchNotificationsInput!): FetchNotificationsResponse
   fetchMyPlaylists(input: FetchMyPlaylistsInput!): FetchPlaylistsResponse
   fetchMyPublishes(input: FetchMyPublishesInput!): FetchPublishesResponse

@@ -136,6 +136,12 @@ export interface NexusGenInputs {
     owner: string; // String!
     requestorId: string; // String!
   }
+  FetchFollowsInput: { // input type
+    accountId: string; // String!
+    cursor?: string | null; // String
+    owner: string; // String!
+    requestorId: string; // String!
+  }
   FetchMyPlaylistsInput: { // input type
     accountId: string; // String!
     cursor?: string | null; // String
@@ -494,6 +500,10 @@ export interface NexusGenObjects {
     edges: NexusGenRootTypes['DontRecommendEdge'][]; // [DontRecommendEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
+  FetchFollowsResponse: { // root type
+    edges: NexusGenRootTypes['FollowEdge'][]; // [FollowEdge!]!
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
   FetchNotificationsResponse: { // root type
     edges: NexusGenRootTypes['NotificationEdge'][]; // [NotificationEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
@@ -523,6 +533,10 @@ export interface NexusGenObjects {
   Follow: { // root type
     followerId: string; // String!
     followingId: string; // String!
+  }
+  FollowEdge: { // root type
+    cursor?: string | null; // String
+    node?: NexusGenRootTypes['Follow'] | null; // Follow
   }
   GetUnReadNotificationsResponse: { // root type
     unread: number; // Int!
@@ -806,6 +820,10 @@ export interface NexusGenFieldTypes {
     edges: NexusGenRootTypes['DontRecommendEdge'][]; // [DontRecommendEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
+  FetchFollowsResponse: { // field return type
+    edges: NexusGenRootTypes['FollowEdge'][]; // [FollowEdge!]!
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
   FetchNotificationsResponse: { // field return type
     edges: NexusGenRootTypes['NotificationEdge'][]; // [NotificationEdge!]!
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
@@ -837,6 +855,11 @@ export interface NexusGenFieldTypes {
     followerId: string; // String!
     following: NexusGenRootTypes['Profile']; // Profile!
     followingId: string; // String!
+    id: string; // String!
+  }
+  FollowEdge: { // field return type
+    cursor: string | null; // String
+    node: NexusGenRootTypes['Follow'] | null; // Follow
   }
   GetUnReadNotificationsResponse: { // field return type
     unread: number; // Int!
@@ -1034,6 +1057,8 @@ export interface NexusGenFieldTypes {
     fetchBookmarks: NexusGenRootTypes['FetchBookmarkResponse'] | null; // FetchBookmarkResponse
     fetchCommentsByPublishId: NexusGenRootTypes['FetchCommentsResponse'] | null; // FetchCommentsResponse
     fetchDontRecommends: NexusGenRootTypes['FetchDontRecommendsResponse'] | null; // FetchDontRecommendsResponse
+    fetchMyFollowers: NexusGenRootTypes['FetchFollowsResponse'] | null; // FetchFollowsResponse
+    fetchMyFollowing: NexusGenRootTypes['FetchFollowsResponse'] | null; // FetchFollowsResponse
     fetchMyNotifications: NexusGenRootTypes['FetchNotificationsResponse'] | null; // FetchNotificationsResponse
     fetchMyPlaylists: NexusGenRootTypes['FetchPlaylistsResponse'] | null; // FetchPlaylistsResponse
     fetchMyPublishes: NexusGenRootTypes['FetchPublishesResponse'] | null; // FetchPublishesResponse
@@ -1223,6 +1248,10 @@ export interface NexusGenFieldTypeNames {
     edges: 'DontRecommendEdge'
     pageInfo: 'PageInfo'
   }
+  FetchFollowsResponse: { // field return type name
+    edges: 'FollowEdge'
+    pageInfo: 'PageInfo'
+  }
   FetchNotificationsResponse: { // field return type name
     edges: 'NotificationEdge'
     pageInfo: 'PageInfo'
@@ -1254,6 +1283,11 @@ export interface NexusGenFieldTypeNames {
     followerId: 'String'
     following: 'Profile'
     followingId: 'String'
+    id: 'String'
+  }
+  FollowEdge: { // field return type name
+    cursor: 'String'
+    node: 'Follow'
   }
   GetUnReadNotificationsResponse: { // field return type name
     unread: 'Int'
@@ -1451,6 +1485,8 @@ export interface NexusGenFieldTypeNames {
     fetchBookmarks: 'FetchBookmarkResponse'
     fetchCommentsByPublishId: 'FetchCommentsResponse'
     fetchDontRecommends: 'FetchDontRecommendsResponse'
+    fetchMyFollowers: 'FetchFollowsResponse'
+    fetchMyFollowing: 'FetchFollowsResponse'
     fetchMyNotifications: 'FetchNotificationsResponse'
     fetchMyPlaylists: 'FetchPlaylistsResponse'
     fetchMyPublishes: 'FetchPublishesResponse'
@@ -1671,6 +1707,12 @@ export interface NexusGenArgTypes {
     }
     fetchDontRecommends: { // args
       input: NexusGenInputs['FetchDontRecommendsInput']; // FetchDontRecommendsInput!
+    }
+    fetchMyFollowers: { // args
+      input: NexusGenInputs['FetchFollowsInput']; // FetchFollowsInput!
+    }
+    fetchMyFollowing: { // args
+      input: NexusGenInputs['FetchFollowsInput']; // FetchFollowsInput!
     }
     fetchMyNotifications: { // args
       input: NexusGenInputs['FetchNotificationsInput']; // FetchNotificationsInput!

@@ -1,5 +1,6 @@
 import { objectType, inputObjectType, extendType, nonNull } from "nexus"
 import { Profile as ProfileModel, Follow as FollowModel } from "nexus-prisma"
+import { Follow as FollowType } from "@prisma/client"
 
 import { NexusGenInputs } from "../typegen"
 import {
@@ -14,6 +15,7 @@ import {
   validateAuthenticity,
 } from "../lib"
 import { publishMessage } from "../listensers/pubsub"
+import { FETCH_QTY } from "../lib/constants"
 
 const { NEW_NOTIFICATION_TOPIC } = process.env
 
@@ -24,6 +26,12 @@ export const Follow = objectType({
     t.field(FollowModel.follower)
     t.field(FollowModel.followingId)
     t.field(FollowModel.following)
+    t.nonNull.field("id", {
+      type: "String",
+      resolve: (parent, _) => {
+        return `${parent.followerId}_${parent.followingId}`
+      },
+    })
   },
 })
 
@@ -180,6 +188,34 @@ export const QueryByNameInput = inputObjectType({
   },
 })
 
+export const FetchFollowsInput = inputObjectType({
+  name: "FetchFollowsInput",
+  definition(t) {
+    t.nonNull.string("accountId")
+    t.nonNull.string("owner")
+    t.nonNull.string("requestorId") // Profile id of the requestor
+    t.string("cursor")
+  },
+})
+
+export const FollowEdge = objectType({
+  name: "FollowEdge",
+  definition(t) {
+    t.string("cursor")
+    t.field("node", {
+      type: "Follow",
+    })
+  },
+})
+
+export const FetchFollowsResponse = objectType({
+  name: "FetchFollowsResponse",
+  definition(t) {
+    t.nonNull.field("pageInfo", { type: "PageInfo" })
+    t.nonNull.list.nonNull.field("edges", { type: "FollowEdge" })
+  },
+})
+
 export const ProfileQuery = extendType({
   type: "Query",
   definition(t) {
@@ -221,6 +257,270 @@ export const ProfileQuery = extendType({
           return prisma.profile.findUnique({
             where: { name },
           })
+        } catch (error) {
+          return null
+        }
+      },
+    })
+
+    /**
+     * Fetch a profile's followers
+     */
+    t.field("fetchMyFollowers", {
+      type: "FetchFollowsResponse",
+      args: { input: nonNull("FetchFollowsInput") },
+      async resolve(_parent, { input }, { prisma, signature, dataSources }) {
+        try {
+          if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
+          const { accountId, owner, requestorId, cursor } = input
+          if (!accountId || !owner || !requestorId)
+            throwError(badInputErrMessage, "BAD_USER_INPUT")
+
+          // Validate authentication/authorization
+          const account = await validateAuthenticity({
+            accountId,
+            owner,
+            dataSources,
+            prisma,
+            signature,
+          })
+          if (!account) throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Find the profile
+          const profile = await prisma.profile.findUnique({
+            where: {
+              id: requestorId,
+            },
+          })
+          if (!profile) throwError(notFoundErrMessage, "NOT_FOUND")
+
+          // Check ownership of the profile
+          if (account?.owner?.toLowerCase() !== profile?.owner?.toLowerCase())
+            throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Query profiles by creator id
+          let followers: FollowType[] = []
+
+          // Count the profile's followers
+          const followersCount = await prisma.follow.count({
+            where: {
+              followerId: requestorId,
+            },
+          })
+
+          if (!cursor) {
+            // A. First query
+            followers = await prisma.follow.findMany({
+              where: {
+                followerId: requestorId,
+              },
+              take: FETCH_QTY,
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+          } else {
+            // B. Consecutive queries
+            // Cusor is in the form of `followerId_followingId`, so we need to split the string for use in the query.
+            const followIds = cursor.split("_")
+            followers = await prisma.follow.findMany({
+              where: {
+                followerId: requestorId,
+              },
+              take: FETCH_QTY,
+              cursor: {
+                followerId_followingId: {
+                  followerId: followIds[0],
+                  followingId: followIds[1],
+                },
+              },
+              skip: 1, // Skip cursor
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+          }
+
+          if (followers.length === FETCH_QTY) {
+            // Fetch result is equal to take quantity, so it has posibility that there are more to be fetched.
+            const lastItem = followers[followers.length - 1]
+            const lastFetchedCursor = `${lastItem.followerId}_${lastItem.followingId}`
+
+            // Check if there is next page
+            const nextQuery = await prisma.follow.findMany({
+              where: {
+                followerId: requestorId,
+              },
+              take: FETCH_QTY,
+              cursor: {
+                followerId_followingId: {
+                  followerId: lastItem.followerId,
+                  followingId: lastItem.followingId,
+                },
+              },
+              skip: 1, // Skip cursor
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+
+            return {
+              pageInfo: {
+                endCursor: lastFetchedCursor,
+                hasNextPage: nextQuery.length > 0,
+                count: followersCount,
+              },
+              edges: followers.map((follow) => ({
+                cursor: `${follow.followerId}_${follow.followingId}`,
+                node: follow,
+              })),
+            }
+          } else {
+            // No more items to be fetched
+            return {
+              pageInfo: {
+                endCursor: null,
+                hasNextPage: false,
+                count: followersCount,
+              },
+              edges: followers.map((follow) => ({
+                cursor: `${follow.followerId}_${follow.followingId}`,
+                node: follow,
+              })),
+            }
+          }
+        } catch (error) {
+          return null
+        }
+      },
+    })
+
+    /**
+     * Fetch a profile's following
+     */
+    t.field("fetchMyFollowing", {
+      type: "FetchFollowsResponse",
+      args: { input: nonNull("FetchFollowsInput") },
+      async resolve(_parent, { input }, { prisma, signature, dataSources }) {
+        try {
+          if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
+          const { accountId, owner, requestorId, cursor } = input
+          if (!accountId || !owner || !requestorId)
+            throwError(badInputErrMessage, "BAD_USER_INPUT")
+
+          // Validate authentication/authorization
+          const account = await validateAuthenticity({
+            accountId,
+            owner,
+            dataSources,
+            prisma,
+            signature,
+          })
+          if (!account) throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Find the profile
+          const profile = await prisma.profile.findUnique({
+            where: {
+              id: requestorId,
+            },
+          })
+          if (!profile) throwError(notFoundErrMessage, "NOT_FOUND")
+
+          // Check ownership of the profile
+          if (account?.owner?.toLowerCase() !== profile?.owner?.toLowerCase())
+            throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Query profiles by creator id
+          let following: FollowType[] = []
+
+          // Count the profile's following
+          const followingCount = await prisma.follow.count({
+            where: {
+              followingId: requestorId,
+            },
+          })
+
+          if (!cursor) {
+            // A. First query
+            following = await prisma.follow.findMany({
+              where: {
+                followingId: requestorId,
+              },
+              take: FETCH_QTY,
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+          } else {
+            // B. Consecutive queries
+            // Cusor is in the form of `followerId_followingId`, so we need to split the string for use in the query.
+            const followIds = cursor.split("_")
+            following = await prisma.follow.findMany({
+              where: {
+                followingId: requestorId,
+              },
+              take: FETCH_QTY,
+              cursor: {
+                followerId_followingId: {
+                  followerId: followIds[0],
+                  followingId: followIds[1],
+                },
+              },
+              skip: 1, // Skip cursor
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+          }
+
+          if (following.length === FETCH_QTY) {
+            // Fetch result is equal to take quantity, so it has posibility that there are more to be fetched.
+            const lastItem = following[following.length - 1]
+            const lastFetchedCursor = `${lastItem.followerId}_${lastItem.followingId}`
+
+            // Check if there is next page
+            const nextQuery = await prisma.follow.findMany({
+              where: {
+                followingId: requestorId,
+              },
+              take: FETCH_QTY,
+              cursor: {
+                followerId_followingId: {
+                  followerId: lastItem.followerId,
+                  followingId: lastItem.followingId,
+                },
+              },
+              skip: 1, // Skip cursor
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+
+            return {
+              pageInfo: {
+                endCursor: lastFetchedCursor,
+                hasNextPage: nextQuery.length > 0,
+                count: followingCount,
+              },
+              edges: following.map((follow) => ({
+                cursor: `${follow.followerId}_${follow.followingId}`,
+                node: follow,
+              })),
+            }
+          } else {
+            // No more items to be fetched
+            return {
+              pageInfo: {
+                endCursor: null,
+                hasNextPage: false,
+                count: followingCount,
+              },
+              edges: following.map((follow) => ({
+                cursor: `${follow.followerId}_${follow.followingId}`,
+                node: follow,
+              })),
+            }
+          }
         } catch (error) {
           return null
         }
