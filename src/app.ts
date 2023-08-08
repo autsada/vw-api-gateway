@@ -15,7 +15,6 @@ import { prisma } from "./client"
 import { WalletAPI } from "./dataSources/walletAPI"
 import { UploadAPI } from "./dataSources/uploadAPI"
 import { router } from "./webhooks/routes"
-import "./listensers"
 import type { Context } from "./context"
 import type { Environment } from "./types"
 

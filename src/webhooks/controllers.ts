@@ -3,13 +3,15 @@ import axios from "axios"
 
 import { prisma } from "../client"
 import { isValidAchemySignature } from "../lib"
-import { publishMessage } from "../listensers/pubsub"
+import { publishMessage } from "../lib/pubsub"
+import { decryptString } from "../lib/crypto"
 
 const {
   CLOUDFLAR_BASE_URL,
   CLOUDFLAR_API_TOKEN,
   CLOUDFLAR_ACCOUNT_ID,
   PUBLISH_PROCESSING_TOPIC,
+  PUBLISH_DELETION_TOPIC,
 } = process.env
 
 /**
@@ -195,6 +197,58 @@ export async function onTranscodingFinished(req: Request, res: Response) {
     // Publish a message to pub/sub
     await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
 
+    res.status(500).end()
+  }
+}
+
+export async function onVideoDeleted(req: Request, res: Response) {
+  try {
+    if (!req.body) {
+      const msg = "no Pub/Sub message received"
+      console.error(`error: ${msg}`)
+      res.status(400).send(`Bad Request: ${msg}`)
+      return
+    }
+    if (!req.body.message) {
+      const msg = "invalid Pub/Sub message format"
+      console.error(`error: ${msg}`)
+      res.status(400).send(`Bad Request: ${msg}`)
+      return
+    }
+
+    // Get the the data from the request
+    const pubSubMessage = req.body.message
+    const data = pubSubMessage.data
+      ? Buffer.from(pubSubMessage.data, "base64").toString().trim()
+      : undefined
+
+    if (!data) {
+      const msg = "No data found"
+      console.error(`error: ${msg}`)
+      res.status(400).send(`Bad Request: ${msg}`)
+      return
+    }
+    // Decrypt the data
+    const publishId = decryptString(data)
+    if (!publishId) {
+      const msg = "Invalid data"
+      console.error(`error: ${msg}`)
+      res.status(400).send(`Bad Request: ${msg}`)
+      return
+    }
+    // Delete the publish in the database
+    const publish = await prisma.publish.delete({
+      where: {
+        id: publishId,
+      },
+    })
+
+    // Publish a publish delete message to pubsub
+    // No need to encrypt publish id because the service that is listening to this topic is a private service that cannot be called from outside anyway.
+    publishMessage(PUBLISH_DELETION_TOPIC!, publish.id)
+
+    res.status(204).send()
+  } catch (error) {
     res.status(500).end()
   }
 }

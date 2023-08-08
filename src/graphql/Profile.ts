@@ -14,7 +14,7 @@ import {
   generateColor,
   validateAuthenticity,
 } from "../lib"
-import { publishMessage } from "../listensers/pubsub"
+import { publishMessage } from "../lib/pubsub"
 import { FETCH_QTY } from "../lib/constants"
 
 const { NEW_NOTIFICATION_TOPIC } = process.env

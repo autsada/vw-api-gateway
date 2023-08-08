@@ -38,7 +38,7 @@ import {
   validateAuthenticity,
 } from "../lib"
 import { FETCH_QTY } from "../lib/constants"
-import { publishMessage } from "../listensers/pubsub"
+import { publishMessage } from "../lib/pubsub"
 
 const { PUBLISH_PROCESSING_TOPIC, NEW_NOTIFICATION_TOPIC } = process.env
 

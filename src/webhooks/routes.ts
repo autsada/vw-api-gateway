@@ -6,6 +6,7 @@ import {
   createTranscodeWebhook,
   deleteTranscodeWebhook,
   onTranscodingFinished,
+  onVideoDeleted,
 } from "./controllers"
 import { validateCloudflareSignature } from "./middlewares"
 
@@ -20,3 +21,4 @@ router.post(
   validateCloudflareSignature,
   onTranscodingFinished
 )
+router.post("/pubsub/video-deleted", onVideoDeleted)
