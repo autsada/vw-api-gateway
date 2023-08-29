@@ -21,6 +21,9 @@ import {
   DisLike as DisLikeModel,
   Blog as BlogModel,
   Tip as TipModel,
+  StreamType as StreamTypeEnum,
+  BroadcastType as BroadcastTypeEnum,
+  LiveStatus as LiveStatusEnum,
 } from "nexus-prisma"
 
 import { NexusGenInputs } from "../typegen"
@@ -46,6 +49,9 @@ export const Category = enumType(CategoryEnum)
 export const PublishClasification = enumType(PublishTypeEnum)
 export const ThumbnailType = enumType(ThumbnailTypeEnum)
 export const Visibility = enumType(VisibilityEnum)
+export const StreamType = enumType(StreamTypeEnum)
+export const BroadcastType = enumType(BroadcastTypeEnum)
+export const LiveStatus = enumType(LiveStatusEnum)
 
 export const Playback = objectType({
   name: PlaybackModel.$name,
@@ -61,6 +67,7 @@ export const Playback = objectType({
     t.field(PlaybackModel.dash)
     t.field(PlaybackModel.publishId)
     t.field(PlaybackModel.publish)
+    t.field(PlaybackModel.liveStatus)
   },
 })
 
@@ -150,6 +157,9 @@ export const Publish = objectType({
     t.field(PublishModel.dislikes)
     t.field(PublishModel.tips)
     t.field(PublishModel.comments)
+    t.field(PublishModel.streamType)
+    t.field(PublishModel.broadcastType)
+    t.field(PublishModel.liveInputUID)
 
     /**
      * Number of likes a publish has
@@ -2636,6 +2646,7 @@ export const UpdateVideoInput = inputObjectType({
     t.field("secondaryCategory", { type: "Category" })
     t.string("tags")
     t.field("visibility", { type: "Visibility" })
+    t.field("broadcastType", { type: "BroadcastType" }) // For live stream update
   },
 })
 
@@ -2861,6 +2872,7 @@ export const PublishMutation = extendType({
             secondaryCategory,
             tags,
             visibility,
+            broadcastType,
           } = input
 
           if (!owner || !accountId || !creatorId || !publishId)
@@ -2903,6 +2915,9 @@ export const PublishMutation = extendType({
           if (publish?.creatorId !== creatorId)
             throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
+          if (broadcastType && publish?.streamType !== "Live")
+            throwError(badInputErrMessage, "BAD_REQUEST")
+
           // Update publish
           await prisma.publish.update({
             where: {
@@ -2918,12 +2933,13 @@ export const PublishMutation = extendType({
               description,
               primaryCategory,
               secondaryCategory,
-              tags: tags || publish?.tags,
+              tags,
               // publishType:
               //   publish?.playback?.duration && publish?.playback?.duration <= 60
               //     ? "Short"
               //     : "Video",
               visibility: visibility || "private",
+              broadcastType: broadcastType || publish?.broadcastType,
               updatedAt: new Date(),
             },
           })
@@ -3430,9 +3446,11 @@ export const PublishMutation = extendType({
             // Call the Upload Service to delete the publish's files without waiting.
             dataSources.uploadAPI.deleteVideo(
               `publishes/${creator?.name}/${publishId}/`,
-              publishId,
-              publish?.playback?.videoId
+              publishId
             )
+
+            // Delete the transcoded video on Cloudflare without waiting
+            dataSources.cloudflareAPI.deleteVideo(publish.playback?.videoId)
 
             // Publish a message to processing topic to pubsub.
             await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
@@ -3452,6 +3470,7 @@ export const PublishMutation = extendType({
 
           return { status: "Ok" }
         } catch (error) {
+          console.log("error -->", error)
           throw error
         }
       },

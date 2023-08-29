@@ -42,7 +42,7 @@ export async function getTranscodeWebhook(req: Request, res: Response) {
   try {
     const response = await axios({
       method: "GET",
-      url: `${CLOUDFLAR_BASE_URL}/${CLOUDFLAR_ACCOUNT_ID}/stream/webhook`,
+      url: `${CLOUDFLAR_BASE_URL}/client/v4/accounts/${CLOUDFLAR_ACCOUNT_ID}/stream/webhook`,
       headers: {
         Authorization: `Bearer ${CLOUDFLAR_API_TOKEN}`,
       },
@@ -67,7 +67,7 @@ export async function createTranscodeWebhook(req: Request, res: Response) {
     } else {
       const response = await axios({
         method: "PUT",
-        url: `${CLOUDFLAR_BASE_URL}/${CLOUDFLAR_ACCOUNT_ID}/stream/webhook`,
+        url: `${CLOUDFLAR_BASE_URL}/client/v4/accounts/${CLOUDFLAR_ACCOUNT_ID}/stream/webhook`,
         headers: {
           Authorization: `Bearer ${CLOUDFLAR_API_TOKEN}`,
         },
@@ -92,7 +92,7 @@ export async function deleteTranscodeWebhook(req: Request, res: Response) {
   try {
     await axios({
       method: "DELETE",
-      url: `${CLOUDFLAR_BASE_URL}/${CLOUDFLAR_ACCOUNT_ID}/stream/webhook`,
+      url: `${CLOUDFLAR_BASE_URL}/client/v4/accounts/${CLOUDFLAR_ACCOUNT_ID}/stream/webhook`,
       headers: {
         Authorization: `Bearer ${CLOUDFLAR_API_TOKEN}`,
       },
@@ -116,13 +116,23 @@ export async function onTranscodingFinished(req: Request, res: Response) {
 
       // `readyToStream` is a boolean that indicate if the playback urls are ready.
       if (body.readyToStream) {
-        const contentPath = body.meta?.path as string
-        publishId = contentPath.split("/")[2]
+        const metaName = body.meta?.name
+        publishId = metaName?.split(" ")[0] || ""
+        console.log("publish id -->", publishId)
+        // const contentPath = (body.meta?.path as string) || body.meta?.name
+        // publishId = contentPath ? contentPath.split("/")[2] : ""
+
+        // Update uploading status on the publish
+        const publish = await prisma.publish.findUnique({
+          where: {
+            id: publishId,
+          },
+        })
 
         // Create (if not exist) or update (if exists) a playback in the database.
         await prisma.playback.upsert({
           where: {
-            id: publishId,
+            publishId,
           },
           create: {
             thumbnail: body.thumbnail,
@@ -139,13 +149,8 @@ export async function onTranscodingFinished(req: Request, res: Response) {
             duration: body.duration,
             hls: body.playback?.hls,
             dash: body.playback?.dash,
-          },
-        })
-
-        // Update uploading status on the publish
-        const publish = await prisma.publish.findUnique({
-          where: {
-            id: publishId,
+            videoId: body.uid,
+            liveStatus: publish?.streamType === "Live" ? "ready" : null,
           },
         })
 
@@ -164,7 +169,13 @@ export async function onTranscodingFinished(req: Request, res: Response) {
                 : publish.thumbnailType,
               contentURI: body.meta?.contentURI,
               contentRef: body.meta?.contentRef,
-              publishType: body.duration <= 60 ? "Short" : "Video",
+              publishType:
+                publish.streamType !== "Live"
+                  ? body.duration <= 60
+                    ? "Short"
+                    : "Video"
+                  : "Video",
+              streamType: "onDemand",
             },
           })
         }
@@ -176,6 +187,7 @@ export async function onTranscodingFinished(req: Request, res: Response) {
       res.status(200).end()
     }
   } catch (error) {
+    console.log("eror -->", error)
     // In case of an error occurred, we have to update the publish so the publish owner will know
     const publish = await prisma.publish.findUnique({
       where: {
@@ -248,6 +260,23 @@ export async function onVideoDeleted(req: Request, res: Response) {
     publishMessage(PUBLISH_DELETION_TOPIC!, publish.id)
 
     res.status(204).send()
+  } catch (error) {
+    res.status(500).end()
+  }
+}
+
+export async function getVideoDetail(req: Request, res: Response) {
+  try {
+    const liveInputId = req.body.liveId
+    const response = await axios({
+      method: "GET",
+      url: `${CLOUDFLAR_BASE_URL}/client/v4/accounts/${CLOUDFLAR_ACCOUNT_ID}/stream/live_inputs/${liveInputId}/videos`,
+      headers: {
+        Authorization: `Bearer ${CLOUDFLAR_API_TOKEN}`,
+      },
+    })
+
+    res.status(200).json({ result: response.data })
   } catch (error) {
     res.status(500).end()
   }

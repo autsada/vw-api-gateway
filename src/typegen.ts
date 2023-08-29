@@ -222,6 +222,12 @@ export interface NexusGenInputs {
     owner: string; // String!
     profileId: string; // String!
   }
+  GetLiveStreamPublishInput: { // input type
+    accountId: string; // String!
+    owner: string; // String!
+    profileId: string; // String!
+    publishId: string; // String!
+  }
   GetMyAccountInput: { // input type
     accountType: NexusGenEnums['AccountType']; // AccountType!
   }
@@ -285,6 +291,20 @@ export interface NexusGenInputs {
     profileId: string; // String!
     publishId: string; // String!
     reason: NexusGenEnums['ReportReason']; // ReportReason!
+  }
+  RequestLiveStreamInput: { // input type
+    accountId: string; // String!
+    broadcastType: NexusGenEnums['BroadcastType']; // BroadcastType!
+    description?: string | null; // String
+    owner: string; // String!
+    primaryCategory: NexusGenEnums['Category']; // Category!
+    profileId: string; // String!
+    secondaryCategory?: NexusGenEnums['Category'] | null; // Category
+    tags?: string | null; // String
+    thumbnail?: string | null; // String
+    thumbnailRef?: string | null; // String
+    title: string; // String!
+    visibility: NexusGenEnums['Visibility']; // Visibility!
   }
   SendTipsInput: { // input type
     accountId: string; // String!
@@ -359,6 +379,7 @@ export interface NexusGenInputs {
   }
   UpdateVideoInput: { // input type
     accountId: string; // String!
+    broadcastType?: NexusGenEnums['BroadcastType'] | null; // BroadcastType
     contentRef?: string | null; // String
     contentURI?: string | null; // String
     creatorId: string; // String!
@@ -383,9 +404,11 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   AccountType: "TRADITIONAL" | "WALLET"
+  BroadcastType: "software" | "webcam"
   Category: "AI" | "Animals" | "Blockchain" | "Children" | "Drinks" | "Education" | "Entertainment" | "Food" | "Gaming" | "Health" | "History" | "LifeStyle" | "Men" | "Movies" | "Music" | "News" | "Other" | "Programming" | "Science" | "Sports" | "Technology" | "Travel" | "Vehicles" | "Women"
   CommentType: "COMMENT" | "PUBLISH"
   CommentsOrderBy: "counts" | "newest"
+  LiveStatus: "inprogress" | "ready"
   NotificationType: "COMMENT" | "FOLLOW" | "LIKE" | "NEW_RELEASE" | "OTHER" | "TIP"
   PlaylistOrderBy: "newest" | "oldest"
   PublishOrderBy: "latest" | "popular"
@@ -393,6 +416,7 @@ export interface NexusGenEnums {
   QueryPublishType: "ads" | "all" | "blogs" | "shorts" | "videos"
   ReadStatus: "read" | "unread"
   ReportReason: "abuse" | "adult" | "harass" | "harmful" | "hateful" | "mislead" | "spam" | "terrorism" | "violent"
+  StreamType: "Live" | "onDemand"
   ThumbnailType: "custom" | "generated"
   Visibility: "draft" | "private" | "public"
 }
@@ -474,6 +498,26 @@ export interface NexusGenObjects {
     filename?: string | null; // String
     id: string; // String!
   }
+  CreateLiveInputMessage: { // root type
+    code: number; // Int!
+    message: string; // String!
+  }
+  CreateLiveInputResponse: { // root type
+    errors: NexusGenRootTypes['CreateLiveInputMessage'][]; // [CreateLiveInputMessage!]!
+    messages: NexusGenRootTypes['CreateLiveInputMessage'][]; // [CreateLiveInputMessage!]!
+    result: NexusGenRootTypes['CreateLiveInputResult']; // CreateLiveInputResult!
+    success: boolean; // Boolean!
+  }
+  CreateLiveInputResult: { // root type
+    rtmps: NexusGenRootTypes['RTMPS']; // RTMPS!
+    rtmpsPlayback: NexusGenRootTypes['RTMPS']; // RTMPS!
+    srt: NexusGenRootTypes['SRT']; // SRT!
+    srtPlayback: NexusGenRootTypes['SRT']; // SRT!
+    status?: NexusGenEnums['LiveStatus'] | null; // LiveStatus
+    uid: string; // String!
+    webRTC: NexusGenRootTypes['WebRTC']; // WebRTC!
+    webRTCPlayback: NexusGenRootTypes['WebRTC']; // WebRTC!
+  }
   DisLike: { // root type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     profileId: string; // String!
@@ -538,6 +582,10 @@ export interface NexusGenObjects {
     cursor?: string | null; // String
     node?: NexusGenRootTypes['Follow'] | null; // Follow
   }
+  GetLiveStreamPublishRespnse: { // root type
+    liveInput?: NexusGenRootTypes['CreateLiveInputResponse'] | null; // CreateLiveInputResponse
+    publish?: NexusGenRootTypes['Publish'] | null; // Publish
+  }
   GetUnReadNotificationsResponse: { // root type
     unread: number; // Int!
   }
@@ -570,6 +618,7 @@ export interface NexusGenObjects {
     duration: number; // Float!
     hls: string; // String!
     id: string; // ID!
+    liveStatus?: NexusGenEnums['LiveStatus'] | null; // LiveStatus
     preview: string; // String!
     publishId: string; // String!
     thumbnail: string; // String!
@@ -624,6 +673,7 @@ export interface NexusGenObjects {
     watchPreferences: NexusGenEnums['Category'][]; // [Category!]!
   }
   Publish: { // root type
+    broadcastType?: NexusGenEnums['BroadcastType'] | null; // BroadcastType
     contentRef?: string | null; // String
     contentURI?: string | null; // String
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -632,9 +682,11 @@ export interface NexusGenObjects {
     description?: string | null; // String
     filename?: string | null; // String
     id: string; // ID!
+    liveInputUID?: string | null; // String
     primaryCategory?: NexusGenEnums['Category'] | null; // Category
     publishType?: NexusGenEnums['PublishType'] | null; // PublishType
     secondaryCategory?: NexusGenEnums['Category'] | null; // Category
+    streamType: NexusGenEnums['StreamType']; // StreamType!
     tags?: string | null; // String
     thumbnail?: string | null; // String
     thumbnailRef?: string | null; // String
@@ -652,12 +704,24 @@ export interface NexusGenObjects {
     node?: NexusGenRootTypes['Publish'] | null; // Publish
   }
   Query: {};
+  RTMPS: { // root type
+    streamKey: string; // String!
+    url: string; // String!
+  }
   Report: { // root type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     id: string; // ID!
     publishId: string; // String!
     reason: NexusGenEnums['ReportReason']; // ReportReason!
     submittedById: string; // String!
+  }
+  RequestLiveStreamResult: { // root type
+    id: string; // String!
+  }
+  SRT: { // root type
+    passphrase: string; // String!
+    streamId: string; // String!
+    url: string; // String!
   }
   SendTipsResult: { // root type
     amount: string; // String!
@@ -688,6 +752,9 @@ export interface NexusGenObjects {
   WatchLaterEdge: { // root type
     cursor?: string | null; // String
     node?: NexusGenRootTypes['WatchLater'] | null; // WatchLater
+  }
+  WebRTC: { // root type
+    url: string; // String!
   }
   WriteResult: { // root type
     status: string; // String!
@@ -791,6 +858,26 @@ export interface NexusGenFieldTypes {
     filename: string | null; // String
     id: string; // String!
   }
+  CreateLiveInputMessage: { // field return type
+    code: number; // Int!
+    message: string; // String!
+  }
+  CreateLiveInputResponse: { // field return type
+    errors: NexusGenRootTypes['CreateLiveInputMessage'][]; // [CreateLiveInputMessage!]!
+    messages: NexusGenRootTypes['CreateLiveInputMessage'][]; // [CreateLiveInputMessage!]!
+    result: NexusGenRootTypes['CreateLiveInputResult']; // CreateLiveInputResult!
+    success: boolean; // Boolean!
+  }
+  CreateLiveInputResult: { // field return type
+    rtmps: NexusGenRootTypes['RTMPS']; // RTMPS!
+    rtmpsPlayback: NexusGenRootTypes['RTMPS']; // RTMPS!
+    srt: NexusGenRootTypes['SRT']; // SRT!
+    srtPlayback: NexusGenRootTypes['SRT']; // SRT!
+    status: NexusGenEnums['LiveStatus'] | null; // LiveStatus
+    uid: string; // String!
+    webRTC: NexusGenRootTypes['WebRTC']; // WebRTC!
+    webRTCPlayback: NexusGenRootTypes['WebRTC']; // WebRTC!
+  }
   DisLike: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     profile: NexusGenRootTypes['Profile']; // Profile!
@@ -861,6 +948,10 @@ export interface NexusGenFieldTypes {
     cursor: string | null; // String
     node: NexusGenRootTypes['Follow'] | null; // Follow
   }
+  GetLiveStreamPublishRespnse: { // field return type
+    liveInput: NexusGenRootTypes['CreateLiveInputResponse'] | null; // CreateLiveInputResponse
+    publish: NexusGenRootTypes['Publish'] | null; // Publish
+  }
   GetUnReadNotificationsResponse: { // field return type
     unread: number; // Int!
   }
@@ -901,6 +992,7 @@ export interface NexusGenFieldTypes {
     removeFromPlaylist: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     removeFromWatchLater: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     reportPublish: NexusGenRootTypes['WriteResult'] | null; // WriteResult
+    requestLiveStream: NexusGenRootTypes['RequestLiveStreamResult'] | null; // RequestLiveStreamResult
     sendTips: NexusGenRootTypes['SendTipsResult'] | null; // SendTipsResult
     updateBannerImage: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateBlog: NexusGenRootTypes['WriteResult'] | null; // WriteResult
@@ -942,6 +1034,7 @@ export interface NexusGenFieldTypes {
     duration: number; // Float!
     hls: string; // String!
     id: string; // ID!
+    liveStatus: NexusGenEnums['LiveStatus'] | null; // LiveStatus
     preview: string; // String!
     publish: NexusGenRootTypes['Publish'] | null; // Publish
     publishId: string; // String!
@@ -1012,6 +1105,7 @@ export interface NexusGenFieldTypes {
   Publish: { // field return type
     blog: NexusGenRootTypes['Blog'] | null; // Blog
     bookmarked: boolean | null; // Boolean
+    broadcastType: NexusGenEnums['BroadcastType'] | null; // BroadcastType
     comments: NexusGenRootTypes['Comment'][]; // [Comment!]!
     commentsCount: number; // Int!
     contentRef: string | null; // String
@@ -1030,10 +1124,12 @@ export interface NexusGenFieldTypes {
     liked: boolean | null; // Boolean
     likes: NexusGenRootTypes['Like'][]; // [Like!]!
     likesCount: number; // Int!
+    liveInputUID: string | null; // String
     playback: NexusGenRootTypes['Playback'] | null; // Playback
     primaryCategory: NexusGenEnums['Category'] | null; // Category
     publishType: NexusGenEnums['PublishType'] | null; // PublishType
     secondaryCategory: NexusGenEnums['Category'] | null; // Category
+    streamType: NexusGenEnums['StreamType']; // StreamType!
     tags: string | null; // String
     thumbnail: string | null; // String
     thumbnailRef: string | null; // String
@@ -1059,6 +1155,7 @@ export interface NexusGenFieldTypes {
     fetchDontRecommends: NexusGenRootTypes['FetchDontRecommendsResponse'] | null; // FetchDontRecommendsResponse
     fetchMyFollowers: NexusGenRootTypes['FetchFollowsResponse'] | null; // FetchFollowsResponse
     fetchMyFollowing: NexusGenRootTypes['FetchFollowsResponse'] | null; // FetchFollowsResponse
+    fetchMyLiveStream: NexusGenRootTypes['FetchPublishesResponse'] | null; // FetchPublishesResponse
     fetchMyNotifications: NexusGenRootTypes['FetchNotificationsResponse'] | null; // FetchNotificationsResponse
     fetchMyPlaylists: NexusGenRootTypes['FetchPlaylistsResponse'] | null; // FetchPlaylistsResponse
     fetchMyPublishes: NexusGenRootTypes['FetchPublishesResponse'] | null; // FetchPublishesResponse
@@ -1076,12 +1173,17 @@ export interface NexusGenFieldTypes {
     fetchVideosByCategory: NexusGenRootTypes['FetchPublishesResponse'] | null; // FetchPublishesResponse
     fetchWatchLater: NexusGenRootTypes['FetchWatchLaterResponse'] | null; // FetchWatchLaterResponse
     getBalance: string; // String!
+    getLiveStreamPublish: NexusGenRootTypes['GetLiveStreamPublishRespnse'] | null; // GetLiveStreamPublishRespnse
     getMyAccount: NexusGenRootTypes['Account'] | null; // Account
     getProfileById: NexusGenRootTypes['Profile'] | null; // Profile
     getProfileByName: NexusGenRootTypes['Profile'] | null; // Profile
     getPublishById: NexusGenRootTypes['Publish'] | null; // Publish
     getShort: NexusGenRootTypes['Publish'] | null; // Publish
     getUnReadNotifications: NexusGenRootTypes['GetUnReadNotificationsResponse'] | null; // GetUnReadNotificationsResponse
+  }
+  RTMPS: { // field return type
+    streamKey: string; // String!
+    url: string; // String!
   }
   Report: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -1091,6 +1193,14 @@ export interface NexusGenFieldTypes {
     reason: NexusGenEnums['ReportReason']; // ReportReason!
     submittedBy: NexusGenRootTypes['Profile']; // Profile!
     submittedById: string; // String!
+  }
+  RequestLiveStreamResult: { // field return type
+    id: string; // String!
+  }
+  SRT: { // field return type
+    passphrase: string; // String!
+    streamId: string; // String!
+    url: string; // String!
   }
   SendTipsResult: { // field return type
     amount: string; // String!
@@ -1126,6 +1236,9 @@ export interface NexusGenFieldTypes {
   WatchLaterEdge: { // field return type
     cursor: string | null; // String
     node: NexusGenRootTypes['WatchLater'] | null; // WatchLater
+  }
+  WebRTC: { // field return type
+    url: string; // String!
   }
   WriteResult: { // field return type
     status: string; // String!
@@ -1219,6 +1332,26 @@ export interface NexusGenFieldTypeNames {
     filename: 'String'
     id: 'String'
   }
+  CreateLiveInputMessage: { // field return type name
+    code: 'Int'
+    message: 'String'
+  }
+  CreateLiveInputResponse: { // field return type name
+    errors: 'CreateLiveInputMessage'
+    messages: 'CreateLiveInputMessage'
+    result: 'CreateLiveInputResult'
+    success: 'Boolean'
+  }
+  CreateLiveInputResult: { // field return type name
+    rtmps: 'RTMPS'
+    rtmpsPlayback: 'RTMPS'
+    srt: 'SRT'
+    srtPlayback: 'SRT'
+    status: 'LiveStatus'
+    uid: 'String'
+    webRTC: 'WebRTC'
+    webRTCPlayback: 'WebRTC'
+  }
   DisLike: { // field return type name
     createdAt: 'DateTime'
     profile: 'Profile'
@@ -1289,6 +1422,10 @@ export interface NexusGenFieldTypeNames {
     cursor: 'String'
     node: 'Follow'
   }
+  GetLiveStreamPublishRespnse: { // field return type name
+    liveInput: 'CreateLiveInputResponse'
+    publish: 'Publish'
+  }
   GetUnReadNotificationsResponse: { // field return type name
     unread: 'Int'
   }
@@ -1329,6 +1466,7 @@ export interface NexusGenFieldTypeNames {
     removeFromPlaylist: 'WriteResult'
     removeFromWatchLater: 'WriteResult'
     reportPublish: 'WriteResult'
+    requestLiveStream: 'RequestLiveStreamResult'
     sendTips: 'SendTipsResult'
     updateBannerImage: 'WriteResult'
     updateBlog: 'WriteResult'
@@ -1370,6 +1508,7 @@ export interface NexusGenFieldTypeNames {
     duration: 'Float'
     hls: 'String'
     id: 'ID'
+    liveStatus: 'LiveStatus'
     preview: 'String'
     publish: 'Publish'
     publishId: 'String'
@@ -1440,6 +1579,7 @@ export interface NexusGenFieldTypeNames {
   Publish: { // field return type name
     blog: 'Blog'
     bookmarked: 'Boolean'
+    broadcastType: 'BroadcastType'
     comments: 'Comment'
     commentsCount: 'Int'
     contentRef: 'String'
@@ -1458,10 +1598,12 @@ export interface NexusGenFieldTypeNames {
     liked: 'Boolean'
     likes: 'Like'
     likesCount: 'Int'
+    liveInputUID: 'String'
     playback: 'Playback'
     primaryCategory: 'Category'
     publishType: 'PublishType'
     secondaryCategory: 'Category'
+    streamType: 'StreamType'
     tags: 'String'
     thumbnail: 'String'
     thumbnailRef: 'String'
@@ -1487,6 +1629,7 @@ export interface NexusGenFieldTypeNames {
     fetchDontRecommends: 'FetchDontRecommendsResponse'
     fetchMyFollowers: 'FetchFollowsResponse'
     fetchMyFollowing: 'FetchFollowsResponse'
+    fetchMyLiveStream: 'FetchPublishesResponse'
     fetchMyNotifications: 'FetchNotificationsResponse'
     fetchMyPlaylists: 'FetchPlaylistsResponse'
     fetchMyPublishes: 'FetchPublishesResponse'
@@ -1504,12 +1647,17 @@ export interface NexusGenFieldTypeNames {
     fetchVideosByCategory: 'FetchPublishesResponse'
     fetchWatchLater: 'FetchWatchLaterResponse'
     getBalance: 'String'
+    getLiveStreamPublish: 'GetLiveStreamPublishRespnse'
     getMyAccount: 'Account'
     getProfileById: 'Profile'
     getProfileByName: 'Profile'
     getPublishById: 'Publish'
     getShort: 'Publish'
     getUnReadNotifications: 'GetUnReadNotificationsResponse'
+  }
+  RTMPS: { // field return type name
+    streamKey: 'String'
+    url: 'String'
   }
   Report: { // field return type name
     createdAt: 'DateTime'
@@ -1519,6 +1667,14 @@ export interface NexusGenFieldTypeNames {
     reason: 'ReportReason'
     submittedBy: 'Profile'
     submittedById: 'String'
+  }
+  RequestLiveStreamResult: { // field return type name
+    id: 'String'
+  }
+  SRT: { // field return type name
+    passphrase: 'String'
+    streamId: 'String'
+    url: 'String'
   }
   SendTipsResult: { // field return type name
     amount: 'String'
@@ -1554,6 +1710,9 @@ export interface NexusGenFieldTypeNames {
   WatchLaterEdge: { // field return type name
     cursor: 'String'
     node: 'WatchLater'
+  }
+  WebRTC: { // field return type name
+    url: 'String'
   }
   WriteResult: { // field return type name
     status: 'String'
@@ -1649,6 +1808,9 @@ export interface NexusGenArgTypes {
     reportPublish: { // args
       input: NexusGenInputs['ReportPublishInput']; // ReportPublishInput!
     }
+    requestLiveStream: { // args
+      input: NexusGenInputs['RequestLiveStreamInput']; // RequestLiveStreamInput!
+    }
     sendTips: { // args
       input: NexusGenInputs['SendTipsInput']; // SendTipsInput!
     }
@@ -1714,6 +1876,9 @@ export interface NexusGenArgTypes {
     fetchMyFollowing: { // args
       input: NexusGenInputs['FetchFollowsInput']; // FetchFollowsInput!
     }
+    fetchMyLiveStream: { // args
+      input: NexusGenInputs['FetchMyPublishesInput']; // FetchMyPublishesInput!
+    }
     fetchMyNotifications: { // args
       input: NexusGenInputs['FetchNotificationsInput']; // FetchNotificationsInput!
     }
@@ -1764,6 +1929,9 @@ export interface NexusGenArgTypes {
     }
     getBalance: { // args
       address: string; // String!
+    }
+    getLiveStreamPublish: { // args
+      input: NexusGenInputs['GetLiveStreamPublishInput']; // GetLiveStreamPublishInput!
     }
     getMyAccount: { // args
       input: NexusGenInputs['GetMyAccountInput']; // GetMyAccountInput!

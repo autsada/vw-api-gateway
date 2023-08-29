@@ -65,6 +65,11 @@ input BookmarkPostInput {
   publishId: String!
 }
 
+enum BroadcastType {
+  software
+  webcam
+}
+
 input CacheSessionInput {
   accountId: String!
   address: String!
@@ -200,6 +205,29 @@ input CreateDraftVideoInput {
 type CreateDraftVideoResult {
   filename: String
   id: String!
+}
+
+type CreateLiveInputMessage {
+  code: Int!
+  message: String!
+}
+
+type CreateLiveInputResponse {
+  errors: [CreateLiveInputMessage!]!
+  messages: [CreateLiveInputMessage!]!
+  result: CreateLiveInputResult!
+  success: Boolean!
+}
+
+type CreateLiveInputResult {
+  rtmps: RTMPS!
+  rtmpsPlayback: RTMPS!
+  srt: SRT!
+  srtPlayback: SRT!
+  status: LiveStatus
+  uid: String!
+  webRTC: WebRTC!
+  webRTCPlayback: WebRTC!
 }
 
 input CreatePlayListInput {
@@ -456,6 +484,18 @@ input FollowInput {
   profileId: String!
 }
 
+input GetLiveStreamPublishInput {
+  accountId: String!
+  owner: String!
+  profileId: String!
+  publishId: String!
+}
+
+type GetLiveStreamPublishRespnse {
+  liveInput: CreateLiveInputResponse
+  publish: Publish
+}
+
 input GetMyAccountInput {
   accountType: AccountType!
 }
@@ -495,6 +535,11 @@ input LikePublishInput {
   publishId: String!
 }
 
+enum LiveStatus {
+  inprogress
+  ready
+}
+
 type Mutation {
   addToNewPlaylist(input: CreatePlayListInput!): WriteResult
   addToPlaylist(input: AddToPlaylistInput!): WriteResult
@@ -525,6 +570,7 @@ type Mutation {
   removeFromPlaylist(input: RemoveFromPlaylistInput!): WriteResult
   removeFromWatchLater(input: RemoveFromWatchLaterInput!): WriteResult
   reportPublish(input: ReportPublishInput!): WriteResult
+  requestLiveStream(input: RequestLiveStreamInput!): RequestLiveStreamResult
   sendTips(input: SendTipsInput!): SendTipsResult
   updateBannerImage(input: UpdateImageInput!): WriteResult
   updateBlog(input: UpdateBlogInput!): WriteResult
@@ -579,6 +625,7 @@ type Playback {
   duration: Float!
   hls: String!
   id: ID!
+  liveStatus: LiveStatus
   preview: String!
   publish: Publish
   publishId: String!
@@ -667,6 +714,7 @@ type Profile {
 type Publish {
   blog: Blog
   bookmarked: Boolean
+  broadcastType: BroadcastType
   comments: [Comment!]!
   commentsCount: Int!
   contentRef: String
@@ -685,10 +733,12 @@ type Publish {
   liked: Boolean
   likes: [Like!]!
   likesCount: Int!
+  liveInputUID: String
   playback: Playback
   primaryCategory: Category
   publishType: PublishType
   secondaryCategory: Category
+  streamType: StreamType!
   tags: String
   thumbnail: String
   thumbnailRef: String
@@ -729,6 +779,7 @@ type Query {
   fetchDontRecommends(input: FetchDontRecommendsInput!): FetchDontRecommendsResponse
   fetchMyFollowers(input: FetchFollowsInput!): FetchFollowsResponse
   fetchMyFollowing(input: FetchFollowsInput!): FetchFollowsResponse
+  fetchMyLiveStream(input: FetchMyPublishesInput!): FetchPublishesResponse
   fetchMyNotifications(input: FetchNotificationsInput!): FetchNotificationsResponse
   fetchMyPlaylists(input: FetchMyPlaylistsInput!): FetchPlaylistsResponse
   fetchMyPublishes(input: FetchMyPublishesInput!): FetchPublishesResponse
@@ -746,6 +797,7 @@ type Query {
   fetchVideosByCategory(input: FetchPublishesByCatInput!): FetchPublishesResponse
   fetchWatchLater(input: FetchWatchLaterInput!): FetchWatchLaterResponse
   getBalance(address: String!): String!
+  getLiveStreamPublish(input: GetLiveStreamPublishInput!): GetLiveStreamPublishRespnse
   getMyAccount(input: GetMyAccountInput!): Account
   getProfileById(input: QueryByIdInput!): Profile
   getProfileByName(input: QueryByNameInput!): Profile
@@ -770,6 +822,11 @@ enum QueryPublishType {
   blogs
   shorts
   videos
+}
+
+type RTMPS {
+  streamKey: String!
+  url: String!
 }
 
 enum ReadStatus {
@@ -835,6 +892,31 @@ enum ReportReason {
   violent
 }
 
+input RequestLiveStreamInput {
+  accountId: String!
+  broadcastType: BroadcastType!
+  description: String
+  owner: String!
+  primaryCategory: Category!
+  profileId: String!
+  secondaryCategory: Category
+  tags: String
+  thumbnail: String
+  thumbnailRef: String
+  title: String!
+  visibility: Visibility!
+}
+
+type RequestLiveStreamResult {
+  id: String!
+}
+
+type SRT {
+  passphrase: String!
+  streamId: String!
+  url: String!
+}
+
 input SendTipsInput {
   accountId: String!
   owner: String!
@@ -849,6 +931,11 @@ type SendTipsResult {
   fee: String!
   from: String!
   to: String!
+}
+
+enum StreamType {
+  Live
+  onDemand
 }
 
 enum ThumbnailType {
@@ -944,6 +1031,7 @@ input UpdatePreferencesInput {
 
 input UpdateVideoInput {
   accountId: String!
+  broadcastType: BroadcastType
   contentRef: String
   contentURI: String
   creatorId: String!
@@ -988,6 +1076,10 @@ type WatchLater {
 type WatchLaterEdge {
   cursor: String
   node: WatchLater
+}
+
+type WebRTC {
+  url: String!
 }
 
 type WriteResult {

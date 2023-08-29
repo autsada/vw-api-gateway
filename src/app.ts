@@ -14,12 +14,14 @@ import { schema } from "./schema"
 import { prisma } from "./client"
 import { WalletAPI } from "./dataSources/walletAPI"
 import { UploadAPI } from "./dataSources/uploadAPI"
+import { CloudflareAPI } from "./dataSources/cloudflareAPI"
 import { router } from "./webhooks/routes"
 import type { Context } from "./context"
 import type { Environment } from "./types"
 
 const { PORT, NODE_ENV } = process.env
 const env = NODE_ENV as Environment
+const port = Number(PORT || 4000)
 
 async function startServer() {
   const app = express()
@@ -79,6 +81,7 @@ async function startServer() {
           dataSources: {
             walletAPI: new WalletAPI({ idToken, cache }),
             uploadAPI: new UploadAPI({ idToken, cache }),
+            cloudflareAPI: new CloudflareAPI({ cache }),
           },
         }
       },
@@ -86,9 +89,9 @@ async function startServer() {
   )
 
   await new Promise<void>((resolver) => {
-    httpServer.listen({ port: Number(PORT) }, resolver)
+    httpServer.listen({ port }, resolver)
   })
-  console.log(`APIs ready at port: ${PORT}`)
+  console.log(`APIs ready at port: ${port}`)
 
   return { server, app }
 }
