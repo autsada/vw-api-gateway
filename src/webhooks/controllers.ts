@@ -118,7 +118,6 @@ export async function onTranscodingFinished(req: Request, res: Response) {
       if (body.readyToStream) {
         const metaName = body.meta?.name
         publishId = metaName?.split(" ")[0] || ""
-        console.log("publish id -->", publishId)
         // const contentPath = (body.meta?.path as string) || body.meta?.name
         // publishId = contentPath ? contentPath.split("/")[2] : ""
 
@@ -187,7 +186,6 @@ export async function onTranscodingFinished(req: Request, res: Response) {
       res.status(200).end()
     }
   } catch (error) {
-    console.log("eror -->", error)
     // In case of an error occurred, we have to update the publish so the publish owner will know
     const publish = await prisma.publish.findUnique({
       where: {

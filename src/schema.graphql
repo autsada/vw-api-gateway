@@ -270,6 +270,13 @@ input DeletePublishInput {
   publishId: String!
 }
 
+input DeletePublishesInput {
+  accountId: String!
+  creatorId: String!
+  owner: String!
+  publishIds: [String!]!
+}
+
 type DisLike {
   createdAt: DateTime!
   profile: Profile!
@@ -557,6 +564,7 @@ type Mutation {
   deleteComment(input: DeleteCommentInput!): WriteResult
   deletePlaylist(input: DeletePlaylistInput!): WriteResult
   deletePublish(input: DeletePublishInput!): WriteResult
+  deletePublishes(input: DeletePublishesInput!): WriteResult
   disLikeComment(input: LikeCommentInput!): WriteResult
   disLikePublish(input: LikePublishInput!): WriteResult
   dontRecommend(input: DontRecommendInput!): WriteResult
@@ -820,6 +828,7 @@ enum QueryPublishType {
   ads
   all
   blogs
+  live
   shorts
   videos
 }

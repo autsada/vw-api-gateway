@@ -111,6 +111,12 @@ export interface NexusGenInputs {
     owner: string; // String!
     publishId: string; // String!
   }
+  DeletePublishesInput: { // input type
+    accountId: string; // String!
+    creatorId: string; // String!
+    owner: string; // String!
+    publishIds: string[]; // [String!]!
+  }
   DontRecommendInput: { // input type
     accountId: string; // String!
     owner: string; // String!
@@ -413,7 +419,7 @@ export interface NexusGenEnums {
   PlaylistOrderBy: "newest" | "oldest"
   PublishOrderBy: "latest" | "popular"
   PublishType: "Ads" | "Blog" | "Podcast" | "Short" | "Video"
-  QueryPublishType: "ads" | "all" | "blogs" | "shorts" | "videos"
+  QueryPublishType: "ads" | "all" | "blogs" | "live" | "shorts" | "videos"
   ReadStatus: "read" | "unread"
   ReportReason: "abuse" | "adult" | "harass" | "harmful" | "hateful" | "mislead" | "spam" | "terrorism" | "violent"
   StreamType: "Live" | "onDemand"
@@ -979,6 +985,7 @@ export interface NexusGenFieldTypes {
     deleteComment: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     deletePlaylist: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     deletePublish: NexusGenRootTypes['WriteResult'] | null; // WriteResult
+    deletePublishes: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     disLikeComment: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     disLikePublish: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     dontRecommend: NexusGenRootTypes['WriteResult'] | null; // WriteResult
@@ -1453,6 +1460,7 @@ export interface NexusGenFieldTypeNames {
     deleteComment: 'WriteResult'
     deletePlaylist: 'WriteResult'
     deletePublish: 'WriteResult'
+    deletePublishes: 'WriteResult'
     disLikeComment: 'WriteResult'
     disLikePublish: 'WriteResult'
     dontRecommend: 'WriteResult'
@@ -1768,6 +1776,9 @@ export interface NexusGenArgTypes {
     }
     deletePublish: { // args
       input: NexusGenInputs['DeletePublishInput']; // DeletePublishInput!
+    }
+    deletePublishes: { // args
+      input: NexusGenInputs['DeletePublishesInput']; // DeletePublishesInput!
     }
     disLikeComment: { // args
       input: NexusGenInputs['LikeCommentInput']; // LikeCommentInput!

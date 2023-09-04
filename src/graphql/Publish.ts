@@ -352,7 +352,7 @@ export const Publish = objectType({
 
 export const QueryPublishType = enumType({
   name: "QueryPublishType",
-  members: ["all", "videos", "shorts", "blogs", "ads"],
+  members: ["all", "videos", "shorts", "blogs", "ads", "live"],
 })
 
 export const PublishOrderBy = enumType({
@@ -527,27 +527,98 @@ export const PublishQuery = extendType({
           if (!cursor) {
             // A. First query
             publishes = await prisma.publish.findMany({
-              where: {
-                creatorId,
-                publishType:
-                  publishType === "videos"
-                    ? {
-                        equals: "Video",
-                      }
-                    : publishType === "shorts"
-                    ? {
-                        equals: "Short",
-                      }
-                    : publishType === "blogs"
-                    ? {
-                        equals: "Blog",
-                      }
-                    : publishType === "ads"
-                    ? {
-                        equals: "Ads",
-                      }
-                    : undefined,
-              },
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            in: ["software", "webcam"],
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : undefined,
               take: FETCH_QTY,
               orderBy: {
                 createdAt: "desc",
@@ -556,27 +627,98 @@ export const PublishQuery = extendType({
           } else {
             // B. Consecutive queries
             publishes = await prisma.publish.findMany({
-              where: {
-                creatorId,
-                publishType:
-                  publishType === "videos"
-                    ? {
-                        equals: "Video",
-                      }
-                    : publishType === "shorts"
-                    ? {
-                        equals: "Short",
-                      }
-                    : publishType === "blogs"
-                    ? {
-                        equals: "Blog",
-                      }
-                    : publishType === "ads"
-                    ? {
-                        equals: "Ads",
-                      }
-                    : undefined,
-              },
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            in: ["software", "webcam"],
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : undefined,
               take: FETCH_QTY,
               cursor: {
                 id: cursor,
@@ -2691,6 +2833,16 @@ export const DeletePublishInput = inputObjectType({
   },
 })
 
+export const DeletePublishesInput = inputObjectType({
+  name: "DeletePublishesInput",
+  definition(t) {
+    t.nonNull.string("owner")
+    t.nonNull.string("accountId")
+    t.nonNull.string("creatorId")
+    t.nonNull.list.nonNull.field("publishIds", { type: "String" })
+  },
+})
+
 /**
  * A result for `calculateTips` mutation
  */
@@ -3374,7 +3526,7 @@ export const PublishMutation = extendType({
     })
 
     /**
-     * Delete a video
+     * Delete a publish
      */
     t.field("deletePublish", {
       type: "WriteResult",
@@ -3470,7 +3622,120 @@ export const PublishMutation = extendType({
 
           return { status: "Ok" }
         } catch (error) {
-          console.log("error -->", error)
+          throw error
+        }
+      },
+    })
+
+    /**
+     * Delete many publishes
+     */
+    t.field("deletePublishes", {
+      type: "WriteResult",
+      args: { input: nonNull("DeletePublishesInput") },
+      resolve: async (
+        _parent,
+        { input },
+        { dataSources, prisma, signature }
+      ) => {
+        try {
+          if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
+          const { owner, accountId, creatorId, publishIds } = input
+          if (
+            !owner ||
+            !accountId ||
+            !creatorId ||
+            !publishIds ||
+            publishIds.length === 0
+          )
+            throwError(badInputErrMessage, "BAD_USER_INPUT")
+
+          // Validate authentication/authorization
+          const account = await validateAuthenticity({
+            accountId,
+            owner,
+            dataSources,
+            prisma,
+            signature,
+          })
+          if (!account) throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Find the creator
+          const creator = await prisma.profile.findUnique({
+            where: {
+              id: creatorId,
+            },
+          })
+          if (!creator) throwError(notFoundErrMessage, "NOT_FOUND")
+
+          // Check ownership of the creator
+          if (account?.owner?.toLowerCase() !== creator?.owner?.toLowerCase())
+            throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          const deletePromises = publishIds.map(async (publishId) => {
+            // Check if the given publish exists
+            const publish = await prisma.publish.findUnique({
+              where: {
+                id: publishId,
+              },
+              include: {
+                playback: true,
+              },
+            })
+            if (!publish) throwError(notFoundErrMessage, "NOT_FOUND")
+
+            // Check ownership of the publish
+            if (publish?.creatorId !== creatorId)
+              throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+            if (
+              publish?.publishType === "Video" ||
+              publish?.publishType === "Short"
+            ) {
+              // For video
+              // It might take a long time to delete the video files so we update the status in the database first.
+              // Update the publish status in the database to `deleting`
+              await prisma.publish.update({
+                where: {
+                  id: publishId,
+                },
+                data: {
+                  deleting: true,
+                },
+              })
+
+              // Call the Upload Service to delete the publish's files without waiting.
+              dataSources.uploadAPI.deleteVideo(
+                `publishes/${creator?.name}/${publishId}/`,
+                publishId
+              )
+
+              // Delete the transcoded video on Cloudflare without waiting
+              dataSources.cloudflareAPI.deleteVideo(publish.playback?.videoId)
+
+              // Publish a message to processing topic to pubsub.
+              return publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
+            } else if (publish?.publishType === "Blog") {
+              // For blog
+              // It should just seconds to delete the cover image, so we can immediately delete the publish in the database.
+              if (publish.thumbnailRef) {
+                dataSources.uploadAPI.deleteImage(publish.thumbnailRef)
+              }
+
+              return prisma.publish.delete({
+                where: {
+                  id: publishId,
+                },
+              })
+            } else {
+              return null
+            }
+          })
+
+          await Promise.allSettled(deletePromises)
+
+          return { status: "Ok" }
+        } catch (error) {
           throw error
         }
       },
