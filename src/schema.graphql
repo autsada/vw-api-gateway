@@ -517,6 +517,13 @@ type GetUnReadNotificationsResponse {
   unread: Int!
 }
 
+input GoLiveInput {
+  accountId: String!
+  owner: String!
+  profileId: String!
+  publishId: String!
+}
+
 scalar Json
 
 type Like {
@@ -545,6 +552,7 @@ input LikePublishInput {
 enum LiveStatus {
   inprogress
   ready
+  schedule
 }
 
 type Mutation {
@@ -569,6 +577,7 @@ type Mutation {
   disLikePublish(input: LikePublishInput!): WriteResult
   dontRecommend(input: DontRecommendInput!): WriteResult
   follow(input: FollowInput!): WriteResult
+  goLive(input: GoLiveInput!): WriteResult
   likeComment(input: LikeCommentInput!): WriteResult
   likePublish(input: LikePublishInput!): WriteResult
   removeAllBookmarks(input: RemoveAllBookmarksInput!): WriteResult

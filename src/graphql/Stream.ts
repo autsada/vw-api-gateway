@@ -13,12 +13,16 @@ import {
   badInputErrMessage,
   unauthorizedErrMessage,
   notFoundErrMessage,
+  badRequestErrMessage,
 } from "./Error"
 import { FETCH_QTY } from "../lib/constants"
+import { publishMessage } from "../lib/pubsub"
 
 const {
   DEFAULT_LIVE_STREAM_THUMBNAIL,
   CLOUDFLARE_LIVE_STREAM_PLAYBACK_BASEURL,
+  PUBLISH_PROCESSING_TOPIC,
+  NEW_NOTIFICATION_TOPIC,
 } = process.env
 
 export const GetLiveStreamPublishInput = inputObjectType({
@@ -363,6 +367,16 @@ export const RequestLiveStreamResult = objectType({
   },
 })
 
+export const GoLiveInput = inputObjectType({
+  name: "GoLiveInput",
+  definition(t) {
+    t.nonNull.string("accountId")
+    t.nonNull.string("owner")
+    t.nonNull.string("profileId")
+    t.nonNull.string("publishId")
+  },
+})
+
 export const StreamMutation = extendType({
   type: "Mutation",
   definition(t) {
@@ -468,13 +482,78 @@ export const StreamMutation = extendType({
                 hls: `${CLOUDFLARE_LIVE_STREAM_PLAYBACK_BASEURL}/${liveInput.result.uid}/video.m3u8`,
                 dash: `${CLOUDFLARE_LIVE_STREAM_PLAYBACK_BASEURL}/${liveInput.result.uid}/video.mpd`,
                 publishId: publish.id,
-                liveStatus: "inprogress",
+                liveStatus: "schedule",
                 videoId: "",
               },
             })
           }
 
           return { id: publish.id }
+        } catch (error) {
+          throw error
+        }
+      },
+    })
+
+    t.field("goLive", {
+      type: "WriteResult",
+      args: { input: nonNull("GoLiveInput") },
+      resolve: async (
+        parent,
+        { input },
+        { dataSources, prisma, signature }
+      ) => {
+        try {
+          // Validate input
+          if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
+          const { accountId, owner, profileId, publishId } = input
+          if (!accountId || !owner || !profileId || !publishId)
+            throwError(badInputErrMessage, "BAD_USER_INPUT")
+
+          // Validate authentication/authorization
+          const account = await validateAuthenticity({
+            accountId,
+            owner,
+            dataSources,
+            prisma,
+            signature,
+          })
+          if (!account) throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Find the profile
+          const profile = await prisma.profile.findUnique({
+            where: {
+              id: profileId,
+            },
+          })
+          if (!profile) throwError(notFoundErrMessage, "NOT_FOUND")
+
+          // Check ownership of the profile
+          if (account?.owner?.toLowerCase() !== profile?.owner?.toLowerCase())
+            throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+          // Find the publish
+          const publish = await prisma.publish.findUnique({
+            where: {
+              id: publishId,
+            },
+          })
+          if (!publish) throwError(badRequestErrMessage, "BAD_REQUEST")
+
+          // Update the playback to `inprogress`
+          await prisma.playback.update({
+            where: {
+              publishId,
+            },
+            data: {
+              liveStatus: "inprogress",
+            },
+          })
+
+          // Publish a message to processing topic to pubsub.
+          await publishMessage(PUBLISH_PROCESSING_TOPIC!, publishId)
+
+          return { status: "Ok" }
         } catch (error) {
           throw error
         }

@@ -828,37 +828,173 @@ export const PublishQuery = extendType({
 
           if (!cursor) {
             publishes = await prisma.publish.findMany({
-              where: {
-                AND: [
-                  {
-                    visibility: {
-                      equals: "public",
-                    },
-                  },
-                  {
-                    publishType:
-                      publishType === "videos"
-                        ? {
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
                             equals: "Video",
-                          }
-                        : publishType === "shorts"
-                        ? { equals: "Short" }
-                        : publishType === "blogs"
-                        ? { equals: "Blog" }
-                        : publishType === "ads"
-                        ? { equals: "Ads" }
-                        : undefined,
-                  },
-                  {
-                    uploading: false,
-                  },
-                  {
-                    creatorId: {
-                      notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "onDemand",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "onDemand",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "Live",
+                          },
+                        },
+                        {
+                          playback: {
+                            liveStatus: {
+                              equals: "inprogress",
+                            },
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                      ],
                     },
-                  },
-                ],
-              },
               take: FETCH_QTY,
               orderBy:
                 orderBy === "popular"
@@ -881,37 +1017,173 @@ export const PublishQuery = extendType({
             })
           } else {
             publishes = await prisma.publish.findMany({
-              where: {
-                AND: [
-                  {
-                    visibility: {
-                      equals: "public",
-                    },
-                  },
-                  {
-                    publishType:
-                      publishType === "videos"
-                        ? {
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
                             equals: "Video",
-                          }
-                        : publishType === "shorts"
-                        ? { equals: "Short" }
-                        : publishType === "blogs"
-                        ? { equals: "Blog" }
-                        : publishType === "ads"
-                        ? { equals: "Ads" }
-                        : undefined,
-                  },
-                  {
-                    uploading: false,
-                  },
-                  {
-                    creatorId: {
-                      notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "onDemand",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "onDemand",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "Live",
+                          },
+                        },
+                        {
+                          playback: {
+                            liveStatus: {
+                              equals: "inprogress",
+                            },
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                      ],
                     },
-                  },
-                ],
-              },
               take: FETCH_QTY,
               cursor: {
                 id: cursor,
@@ -944,37 +1216,173 @@ export const PublishQuery = extendType({
 
             // Check if there is next page
             let nextQuery = await prisma.publish.findMany({
-              where: {
-                AND: [
-                  {
-                    visibility: {
-                      equals: "public",
-                    },
-                  },
-                  {
-                    publishType:
-                      publishType === "videos"
-                        ? {
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
                             equals: "Video",
-                          }
-                        : publishType === "shorts"
-                        ? { equals: "Short" }
-                        : publishType === "blogs"
-                        ? { equals: "Blog" }
-                        : publishType === "ads"
-                        ? { equals: "Ads" }
-                        : undefined,
-                  },
-                  {
-                    uploading: false,
-                  },
-                  {
-                    creatorId: {
-                      notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "onDemand",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "onDemand",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          streamType: {
+                            equals: "Live",
+                          },
+                        },
+                        {
+                          playback: {
+                            liveStatus: {
+                              equals: "inprogress",
+                            },
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : {
+                      AND: [
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          uploading: {
+                            equals: false,
+                          },
+                        },
+                        {
+                          creatorId: {
+                            notIn: dontRecommendsList,
+                          },
+                        },
+                      ],
                     },
-                  },
-                ],
-              },
               take: FETCH_QTY,
               cursor: {
                 id: lastFetchedCursor,
@@ -1591,32 +1999,136 @@ export const PublishQuery = extendType({
           if (!cursor) {
             // A. First query
             publishes = await prisma.publish.findMany({
-              where: {
-                AND: [
-                  {
-                    creatorId,
-                  },
-                  {
-                    visibility: {
-                      equals: "public",
-                    },
-                  },
-                  {
-                    publishType:
-                      publishType === "videos"
-                        ? {
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
                             equals: "Video",
-                          }
-                        : publishType === "shorts"
-                        ? { equals: "Short" }
-                        : publishType === "blogs"
-                        ? { equals: "Blog" }
-                        : publishType === "ads"
-                        ? { equals: "Ads" }
-                        : undefined,
-                  },
-                ],
-              },
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            in: ["software", "webcam"],
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                      ],
+                    },
               take: FETCH_QTY,
               orderBy:
                 orderBy === "popular"
@@ -1640,32 +2152,136 @@ export const PublishQuery = extendType({
           } else {
             // B. Consecutive queries
             publishes = await prisma.publish.findMany({
-              where: {
-                AND: [
-                  {
-                    creatorId,
-                  },
-                  {
-                    visibility: {
-                      equals: "public",
-                    },
-                  },
-                  {
-                    publishType:
-                      publishType === "videos"
-                        ? {
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
                             equals: "Video",
-                          }
-                        : publishType === "shorts"
-                        ? { equals: "Short" }
-                        : publishType === "blogs"
-                        ? { equals: "Blog" }
-                        : publishType === "ads"
-                        ? { equals: "Ads" }
-                        : undefined,
-                  },
-                ],
-              },
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            in: ["software", "webcam"],
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                      ],
+                    },
               take: FETCH_QTY,
               cursor: {
                 id: cursor,
@@ -1705,32 +2321,136 @@ export const PublishQuery = extendType({
 
             // Check if there is next page
             const nextQuery = await prisma.publish.findMany({
-              where: {
-                AND: [
-                  {
-                    creatorId,
-                  },
-                  {
-                    visibility: {
-                      equals: "public",
-                    },
-                  },
-                  {
-                    publishType:
-                      publishType === "videos"
-                        ? {
+              where:
+                publishType === "videos"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
                             equals: "Video",
-                          }
-                        : publishType === "shorts"
-                        ? { equals: "Short" }
-                        : publishType === "blogs"
-                        ? { equals: "Blog" }
-                        : publishType === "ads"
-                        ? { equals: "Ads" }
-                        : undefined,
-                  },
-                ],
-              },
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "shorts"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Short",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            equals: null,
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "live"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Video",
+                          },
+                        },
+                        {
+                          broadcastType: {
+                            in: ["software", "webcam"],
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "blogs"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Blog",
+                          },
+                        },
+                      ],
+                    }
+                  : publishType === "ads"
+                  ? {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                        {
+                          publishType: {
+                            equals: "Ads",
+                          },
+                        },
+                      ],
+                    }
+                  : {
+                      AND: [
+                        {
+                          creatorId: {
+                            equals: creatorId,
+                          },
+                        },
+                        {
+                          visibility: {
+                            equals: "public",
+                          },
+                        },
+                      ],
+                    },
               take: FETCH_QTY,
               cursor: {
                 id: lastFetchedCursor,

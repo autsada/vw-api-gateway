@@ -111,6 +111,7 @@ enum PublishType {
 }
 
 enum LiveStatus {
+  schedule
   inprogress
   ready
 }

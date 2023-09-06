@@ -242,6 +242,12 @@ export interface NexusGenInputs {
     owner: string; // String!
     profileId: string; // String!
   }
+  GoLiveInput: { // input type
+    accountId: string; // String!
+    owner: string; // String!
+    profileId: string; // String!
+    publishId: string; // String!
+  }
   LikeCommentInput: { // input type
     accountId: string; // String!
     commentId: string; // String!
@@ -414,7 +420,7 @@ export interface NexusGenEnums {
   Category: "AI" | "Animals" | "Blockchain" | "Children" | "Drinks" | "Education" | "Entertainment" | "Food" | "Gaming" | "Health" | "History" | "LifeStyle" | "Men" | "Movies" | "Music" | "News" | "Other" | "Programming" | "Science" | "Sports" | "Technology" | "Travel" | "Vehicles" | "Women"
   CommentType: "COMMENT" | "PUBLISH"
   CommentsOrderBy: "counts" | "newest"
-  LiveStatus: "inprogress" | "ready"
+  LiveStatus: "inprogress" | "ready" | "schedule"
   NotificationType: "COMMENT" | "FOLLOW" | "LIKE" | "NEW_RELEASE" | "OTHER" | "TIP"
   PlaylistOrderBy: "newest" | "oldest"
   PublishOrderBy: "latest" | "popular"
@@ -990,6 +996,7 @@ export interface NexusGenFieldTypes {
     disLikePublish: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     dontRecommend: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     follow: NexusGenRootTypes['WriteResult'] | null; // WriteResult
+    goLive: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     likeComment: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     likePublish: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     removeAllBookmarks: NexusGenRootTypes['WriteResult'] | null; // WriteResult
@@ -1465,6 +1472,7 @@ export interface NexusGenFieldTypeNames {
     disLikePublish: 'WriteResult'
     dontRecommend: 'WriteResult'
     follow: 'WriteResult'
+    goLive: 'WriteResult'
     likeComment: 'WriteResult'
     likePublish: 'WriteResult'
     removeAllBookmarks: 'WriteResult'
@@ -1791,6 +1799,9 @@ export interface NexusGenArgTypes {
     }
     follow: { // args
       input: NexusGenInputs['FollowInput']; // FollowInput!
+    }
+    goLive: { // args
+      input: NexusGenInputs['GoLiveInput']; // GoLiveInput!
     }
     likeComment: { // args
       input: NexusGenInputs['LikeCommentInput']; // LikeCommentInput!
