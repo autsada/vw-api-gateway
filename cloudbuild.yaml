@@ -9,14 +9,18 @@ steps:
         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}",
         ".",
       ]
+  # Install prisma v4.16.2
+  - id: "install-prisma"
+    name: "node"
+    entrypoint: npm
+    args: ["install", "prisma@4.16.2"]
   # Run database migrations
   - id: "migration"
     name: "gcr.io/cloud-builders/npm"
     entrypoint: npx
     env:
       - DATABASE_URL=$_DATABASE_URL
-    args:
-      ["npm", "install", "prisma@4.16.2", "&", "prisma", "migrate", "deploy"]
+    args: ["prisma", "migrate", "deploy"]
 # Push the image to artifact registry
 images:
   - "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}"
