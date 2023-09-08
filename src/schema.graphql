@@ -224,7 +224,7 @@ type CreateLiveInputResult {
   rtmpsPlayback: RTMPS!
   srt: SRT!
   srtPlayback: SRT!
-  status: LiveStatus
+  status: LiveInputStatus
   uid: String!
   webRTC: WebRTC!
   webRTCPlayback: WebRTC!
@@ -547,6 +547,17 @@ input LikePublishInput {
   owner: String!
   profileId: String!
   publishId: String!
+}
+
+enum LiveInputStatus {
+  client_disconnect
+  connected
+  failed_to_connect
+  failed_to_reconnect
+  new_configuration_accepted
+  reconnected
+  reconnecting
+  ttl_exceeded
 }
 
 enum LiveStatus {

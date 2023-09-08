@@ -420,6 +420,7 @@ export interface NexusGenEnums {
   Category: "AI" | "Animals" | "Blockchain" | "Children" | "Drinks" | "Education" | "Entertainment" | "Food" | "Gaming" | "Health" | "History" | "LifeStyle" | "Men" | "Movies" | "Music" | "News" | "Other" | "Programming" | "Science" | "Sports" | "Technology" | "Travel" | "Vehicles" | "Women"
   CommentType: "COMMENT" | "PUBLISH"
   CommentsOrderBy: "counts" | "newest"
+  LiveInputStatus: "client_disconnect" | "connected" | "failed_to_connect" | "failed_to_reconnect" | "new_configuration_accepted" | "reconnected" | "reconnecting" | "ttl_exceeded"
   LiveStatus: "inprogress" | "ready" | "schedule"
   NotificationType: "COMMENT" | "FOLLOW" | "LIKE" | "NEW_RELEASE" | "OTHER" | "TIP"
   PlaylistOrderBy: "newest" | "oldest"
@@ -525,7 +526,7 @@ export interface NexusGenObjects {
     rtmpsPlayback: NexusGenRootTypes['RTMPS']; // RTMPS!
     srt: NexusGenRootTypes['SRT']; // SRT!
     srtPlayback: NexusGenRootTypes['SRT']; // SRT!
-    status?: NexusGenEnums['LiveStatus'] | null; // LiveStatus
+    status?: NexusGenEnums['LiveInputStatus'] | null; // LiveInputStatus
     uid: string; // String!
     webRTC: NexusGenRootTypes['WebRTC']; // WebRTC!
     webRTCPlayback: NexusGenRootTypes['WebRTC']; // WebRTC!
@@ -885,7 +886,7 @@ export interface NexusGenFieldTypes {
     rtmpsPlayback: NexusGenRootTypes['RTMPS']; // RTMPS!
     srt: NexusGenRootTypes['SRT']; // SRT!
     srtPlayback: NexusGenRootTypes['SRT']; // SRT!
-    status: NexusGenEnums['LiveStatus'] | null; // LiveStatus
+    status: NexusGenEnums['LiveInputStatus'] | null; // LiveInputStatus
     uid: string; // String!
     webRTC: NexusGenRootTypes['WebRTC']; // WebRTC!
     webRTCPlayback: NexusGenRootTypes['WebRTC']; // WebRTC!
@@ -1361,7 +1362,7 @@ export interface NexusGenFieldTypeNames {
     rtmpsPlayback: 'RTMPS'
     srt: 'SRT'
     srtPlayback: 'SRT'
-    status: 'LiveStatus'
+    status: 'LiveInputStatus'
     uid: 'String'
     webRTC: 'WebRTC'
     webRTCPlayback: 'WebRTC'

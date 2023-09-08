@@ -297,8 +297,8 @@ export const WebRTC = objectType({
   },
 })
 
-export const LiveStatus = enumType({
-  name: "LiveStatus",
+export const LiveInputStatus = enumType({
+  name: "LiveInputStatus",
   members: [
     "connected",
     "reconnected",
@@ -315,7 +315,7 @@ export const CreateLiveInputResult = objectType({
   name: "CreateLiveInputResult",
   definition(t) {
     t.nonNull.string("uid")
-    t.field("status", { type: "LiveStatus" })
+    t.field("status", { type: "LiveInputStatus" })
     t.nonNull.field("rtmps", { type: "RTMPS" })
     t.nonNull.field("rtmpsPlayback", { type: "RTMPS" })
     t.nonNull.field("srt", { type: "SRT" })
