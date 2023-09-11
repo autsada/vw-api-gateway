@@ -12,8 +12,12 @@ steps:
 
   # Push the image to artifact registry
   - id: "docker-push"
-    - name: 'gcr.io/cloud-builders/docker'
-      args: ['push', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}']
+    name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}",
+      ]
 
   # Builds a second container, copying in the Cloud SQL Auth Proxy binary, this container isn't needed to be pushed to any registry, and are discarded on build completion
   - id: "docker-layer"
