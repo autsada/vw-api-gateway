@@ -38,7 +38,7 @@ steps:
     args:
       - "-c"
       - |
-        /cloudsql/cloud-sql-proxy --port 5432 vewwit-sql & sleep 2;
+        /cloudsql/cloud-sql-proxy --port 5432 ${PROJECT_ID}:${_LOCATION}:vewwit-sql & sleep 2;
         npx prisma migrate deploy
 
 # Push the image to artifact registry
