@@ -36,13 +36,12 @@ steps:
   - id: "migrate-tcp"
     name: "gcr.io/${PROJECT_ID}/sql-proxy-proxy"
     dir: .
-    env:
-      - DATABASE_URL=$_DATABASE_URL
     entrypoint: /bin/bash
     args:
       - "-c"
       - |
-        /cloudsql/cloud-sql-proxy --port 5432 ${PROJECT_ID}:${_LOCATION}:vewwit-sql & sleep 2;
+        /cloudsql/cloud-sql-proxy --port 5432 ${PROJECT_ID}:${_LOCATION}:vewwit-sql & sleep 2
+        export DATABASE_URL=$_DATABASE_URL
         npx prisma migrate deploy
 
 # # Push the image to artifact registry
