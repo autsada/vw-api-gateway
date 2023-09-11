@@ -10,10 +10,10 @@ steps:
         ".",
       ]
 
-  # Temporary push to container registry
+  # Push the image to artifact registry
   - id: "docker-push"
-    name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/${PROJECT_ID}/sql-proxy"]
+    - name: 'gcr.io/cloud-builders/docker'
+      args: ['push', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}']
 
   # Builds a second container, copying in the Cloud SQL Auth Proxy binary, this container isn't needed to be pushed to any registry, and are discarded on build completion
   - id: "docker-layer"
@@ -22,7 +22,7 @@ steps:
     args:
       - "-c"
       - |
-        echo "FROM $gcr.io/${PROJECT_ID}/sql-proxy
+        echo "FROM ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}
         COPY --from=gcr.io/cloud-sql-connectors/cloud-sql-proxy /cloud-sql-proxy /cloudsql/cloud-sql-proxy
         RUN npm install prisma@4.16.2" > Dockerfile-proxy;
 
