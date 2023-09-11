@@ -33,18 +33,24 @@ steps:
         docker build -f Dockerfile-proxy -t gcr.io/${PROJECT_ID}/sql-proxy-proxy .
 
   # For TCP connections
-  - id: "migrate-tcp"
+  - id: "proxy-tcp"
     name: "gcr.io/${PROJECT_ID}/sql-proxy-proxy"
     dir: .
-    env:
-      - DATABASE_URL=$_DATABASE_URL
+    # env:
+    #   - DATABASE_URL=$_DATABASE_URL
     entrypoint: /bin/bash
     args:
       - "-c"
       - |
         /cloudsql/cloud-sql-proxy --port 5432 ${PROJECT_ID}:${_LOCATION}:vewwit-sql & sleep 2;
-        npx prisma migrate deploy
-
+  # Run database migrations
+  - id: "migration"
+    name: "gcr.io/cloud-builders/npm"
+    entrypoint: npx
+    env:
+      - DATABASE_URL=$_DATABASE_URL
+    args: ["prisma", "migrate", "deploy"]
+    waitFor: ["proxy-tcp"]
 # # Push the image to artifact registry
 # images:
 #   - "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}"
