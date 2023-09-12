@@ -27,6 +27,9 @@ options:
     name: projects/$PROJECT_ID/locations/us-central1/workerPools/vw-private-pool
   dynamic_substitutions: true
 
+substitutions:
+  _DATABASE_URL: DATABASE_URL
+
 availableSecrets:
   secretManager:
     - versionName: projects/$PROJECT_ID/secrets/${_DATABASE_URL}/versions/latest
