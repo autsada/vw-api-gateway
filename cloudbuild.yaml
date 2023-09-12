@@ -2,75 +2,27 @@ steps:
   # Build an image
   - id: "docker-build"
     name: "gcr.io/cloud-builders/docker"
-    args:
-      [
-        "build",
-        "-t",
-        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}",
-        ".",
-      ]
+    args: ["build", "-t", "${_IMAGE_NAME}", "."]
 
-  # Push the image to artifact registry
-  - id: "docker-push"
-    name: "gcr.io/cloud-builders/docker"
-    args:
-      [
-        "push",
-        "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}",
-      ]
+  # Install prisma v4.16.2
+  - id: "install-prisma"
+    name: "node"
+    entrypoint: npm
+    args: ["install", "prisma@4.16.2"]
 
-  # Builds a second container, copying in the Cloud SQL Auth Proxy binary, this container isn't needed to be pushed to any registry, and are discarded on build completion
-  - id: "docker-layer"
-    name: "gcr.io/cloud-builders/docker"
-    entrypoint: /bin/bash
-    args:
-      - "-c"
-      - |
-        echo "FROM ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}
-        COPY --from=gcr.io/cloud-sql-connectors/cloud-sql-proxy /cloud-sql-proxy /cloudsql/cloud-sql-proxy
-        RUN npm install prisma@4.16.2" > Dockerfile-proxy;
+  # Run database migrations
+  - id: "migration"
+    name: "node"
+    entrypoint: npx
+    env:
+      - DATABASE_URL=$_DATABASE_URL
+    args: ["prisma", "migrate", "deploy"]
 
-        docker build -f Dockerfile-proxy -t gcr.io/${PROJECT_ID}/sql-proxy-proxy .
+# Push the image to artifact registry
+images:
+  - "${_IMAGE_NAME}"
 
-  # For TCP connections
-  - id: "migrate-tcp"
-    name: "gcr.io/${PROJECT_ID}/sql-proxy-proxy"
-    dir: .
-    entrypoint: /bin/bash
-    args:
-      - "-c"
-      - |
-        /cloudsql/cloud-sql-proxy --port 5432 ${PROJECT_ID}:${_LOCATION}:vewwit-sql & sleep 2
-        export DATABASE_URL=$_DATABASE_URL
-        npx prisma migrate deploy
-
-# # Push the image to artifact registry
-# images:
-#   - "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}"
-
-# steps:
-#   # Build an image
-#   - id: "docker-build"
-#     name: "gcr.io/cloud-builders/docker"
-#     args:
-#       [
-#         "build",
-#         "-t",
-#         "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}",
-#         ".",
-#       ]
-#   # Install prisma v4.16.2
-#   - id: "install-prisma"
-#     name: "node"
-#     entrypoint: npm
-#     args: ["install", "prisma@4.16.2"]
-#   # Run database migrations
-#   - id: "migration"
-#     name: "gcr.io/cloud-builders/npm"
-#     entrypoint: npx
-#     env:
-#       - DATABASE_URL=$_DATABASE_URL
-#     args: ["prisma", "migrate", "deploy"]
-# # Push the image to artifact registry
-# images:
-#   - "${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}"
+options:
+  pool:
+    name: projects/$PROJECT_ID/locations/us-central1/workerPools/vw-private-pool
+  dynamic_substitutions: true
