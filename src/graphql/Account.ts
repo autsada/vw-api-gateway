@@ -113,6 +113,7 @@ export const AccountQuery = extendType({
             return null
           }
         } catch (error) {
+          console.log("my error -->", error)
           throw error
         }
       },
@@ -179,12 +180,15 @@ export const AccountMutation = extendType({
       args: { input: nonNull("GetMyAccountInput") },
       async resolve(_parent, { input }, { dataSources, prisma, signature }) {
         try {
+          console.log("called -->")
           if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
 
           // Verify id token first.
           const { uid } = await dataSources.walletAPI.verifyUser()
 
           const { accountType } = input
+          console.log("uid -->", uid)
+          console.log("type -->", accountType)
           if (accountType === "TRADITIONAL") {
             // `TRADITIONAL` account
             // Create wallet first
@@ -245,6 +249,7 @@ export const AccountMutation = extendType({
             })
           }
         } catch (error) {
+          console.log("error -->", error)
           throw error
         }
       },
