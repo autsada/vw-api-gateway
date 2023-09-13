@@ -195,24 +195,24 @@ export const AccountMutation = extendType({
             const { address, uid } = await dataSources.walletAPI.createWallet()
             const owner = address.toLowerCase()
 
-            // Create (if not exist)  an account in the database
-            await prisma.account.upsert({
+            let account = await prisma.account.findUnique({
               where: {
                 owner,
               },
-              create: {
-                type: "TRADITIONAL",
-                owner,
-                authUid: uid,
-              },
-              update: {},
             })
 
-            return prisma.account.findUnique({
-              where: {
-                owner,
-              },
-            })
+            if (!account) {
+              // Create (if not exist)  an account in the database
+              account = await prisma.account.create({
+                data: {
+                  type: "TRADITIONAL",
+                  owner,
+                  authUid: uid,
+                },
+              })
+            }
+
+            return account
           } else {
             // `WALLET` account
             if (!signature || accountType !== "WALLET")
@@ -225,28 +225,28 @@ export const AccountMutation = extendType({
               },
             })
 
-            if (ac) throwError(badRequestErrMessage, "BAD_REQUEST")
+            if (ac) return ac
 
             const ownerAddress = recoverAddress(signature!)
             const owner = ownerAddress.toLowerCase()
 
-            // Create (if not exist)  an account in the database
-            await prisma.account.upsert({
+            let account = await prisma.account.findUnique({
               where: {
                 owner,
               },
-              create: {
-                type: accountType,
-                owner,
-              },
-              update: {},
             })
 
-            return prisma.account.findUnique({
-              where: {
-                owner,
-              },
-            })
+            if (!account) {
+              // Create (if not exist)  an account in the database
+              account = await prisma.account.create({
+                data: {
+                  type: accountType,
+                  owner,
+                },
+              })
+            }
+
+            return account
           }
         } catch (error) {
           console.log("error -->", error)
