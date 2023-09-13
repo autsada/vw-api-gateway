@@ -86,6 +86,7 @@ export const AccountQuery = extendType({
             // `TRADITIONAL` account
             // Get user's wallet address
             const { address } = await dataSources.walletAPI.getWalletAddress()
+            console.log("address -->", address)
 
             if (address) {
               // Query account from the database
@@ -194,6 +195,7 @@ export const AccountMutation = extendType({
             // Create wallet first
             const { address, uid } = await dataSources.walletAPI.createWallet()
             const owner = address.toLowerCase()
+            console.log("owner -->", owner)
 
             let account = await prisma.account.findUnique({
               where: {
