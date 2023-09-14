@@ -79,24 +79,63 @@ export const AccountQuery = extendType({
           if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
 
           // Verify id token first.
-          await dataSources.walletAPI.verifyUser()
+          const { uid: authUid } = await dataSources.walletAPI.verifyUser()
 
           const { accountType } = input
           if (accountType === "TRADITIONAL") {
             // `TRADITIONAL` account
             // Get user's wallet address
-            const { address } = await dataSources.walletAPI.getWalletAddress()
+            const { address, uid } =
+              await dataSources.walletAPI.getWalletAddress()
             console.log("address -->", address)
 
+            // Check if user is authorized
+            if (authUid !== uid)
+              throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+            // Query account from the database
+            let account = await prisma.account.findUnique({
+              where: {
+                authUid,
+              },
+            })
+
             if (address) {
-              // Query account from the database
               const owner = address.toLowerCase()
-              return prisma.account.findUnique({
-                where: {
-                  owner,
-                },
-              })
+
+              if (account) {
+                if (account.owner?.toLowerCase() !== owner) {
+                  // In this case update the account in the database
+                  account = await prisma.account.update({
+                    where: {
+                      authUid,
+                    },
+                    data: {
+                      owner,
+                    },
+                  })
+                }
+              } else {
+                // In this case, create a new account in the database
+                account = await prisma.account.create({
+                  data: {
+                    type: "TRADITIONAL",
+                    owner,
+                    authUid: uid,
+                  },
+                })
+              }
+
+              return account
             } else {
+              if (account) {
+                // In this case remove the account from the database
+                await prisma.account.delete({
+                  where: {
+                    authUid,
+                  },
+                })
+              }
               return null
             }
           } else if (accountType === "WALLET") {
@@ -192,46 +231,72 @@ export const AccountMutation = extendType({
           console.log("type -->", accountType)
           if (accountType === "TRADITIONAL") {
             // `TRADITIONAL` account
-            // 1. Check if account exists using the provided uid
+            // 1. Get the wallet
+            const { address, uid } = await dataSources.walletAPI.createWallet()
+            const owner = address.toLowerCase()
+            console.log("owner -->", owner, " : ", uid)
+
+            // Check if user is authorized
+            if (authUid !== uid)
+              throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
+
+            // 2. Check if account exists in the database using the provided uid
             let account = await prisma.account.findUnique({
               where: {
                 authUid,
               },
             })
-            console.log("account 1 -->", account)
-            if (account) return account
 
-            // 2. If no account found, create a wallet
-            const { address, uid } = await dataSources.walletAPI.createWallet()
-            const owner = address.toLowerCase()
-            console.log("owner -->", owner, " : ", uid)
+            if (account) {
+              if (account.owner?.toLowerCase() !== owner) {
+                // In this case update the account in the database
+                account = await prisma.account.update({
+                  where: {
+                    authUid,
+                  },
+                  data: {
+                    owner,
+                  },
+                })
+              }
 
-            // 3. Find the account again using uid or address.
-            account =
-              (await prisma.account.findUnique({
-                where: {
-                  authUid: uid,
-                },
-              })) ||
-              (await prisma.account.findUnique({
-                where: {
-                  owner,
-                },
-              }))
+              console.log("account 1 -->", account)
+              return account
+            }
 
-            console.log("account 2 -->", account)
+            // 3. If account not found using the uid, find it again using an address.
+            account = await prisma.account.findUnique({
+              where: {
+                owner,
+              },
+            })
+
+            if (account) {
+              if (!account.authUid) {
+                // In this case update the account in the database
+                account = await prisma.account.update({
+                  where: {
+                    owner,
+                  },
+                  data: {
+                    authUid,
+                  },
+                })
+              }
+
+              console.log("account 2 -->", account)
+              return account
+            }
 
             // 4. Only no account found here, then we create a new account.
-            if (!account) {
-              account = await prisma.account.create({
-                data: {
-                  type: "TRADITIONAL",
-                  owner,
-                  authUid: uid,
-                },
-              })
-              console.log("account 3 -->", account)
-            }
+            account = await prisma.account.create({
+              data: {
+                type: "TRADITIONAL",
+                owner,
+                authUid: uid,
+              },
+            })
+            console.log("account 3 -->", account)
 
             return account
           } else {

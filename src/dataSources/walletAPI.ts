@@ -46,7 +46,7 @@ export class WalletAPI extends RESTDataSource {
   /**
    * @dev A route to get user's wallet address (for `TRADITIONAL` account)
    */
-  async getWalletAddress(): Promise<{ address: string }> {
+  async getWalletAddress(): Promise<{ address: string; uid: string }> {
     return this.get("wallet/address")
   }
 
