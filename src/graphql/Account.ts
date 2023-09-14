@@ -298,9 +298,9 @@ export const AccountMutation = extendType({
               },
             })
 
-            if (env !== "production") {
-              // Add the address to Alchemy notify (without waiting)
-              axios({
+            if (env !== "development") {
+              // Add the address to Alchemy notify
+              await axios({
                 url: ALCHEMY_NOTIFY_URL!,
                 method: "PATCH",
                 headers: {
@@ -343,9 +343,10 @@ export const AccountMutation = extendType({
               },
             })
 
-            if (env !== "production") {
-              // Add the address to Alchemy notify (without waiting)
-              axios({
+            if (env !== "development") {
+              // Add the address to Alchemy notify
+              console.log("add notify -->")
+              await axios({
                 url: ALCHEMY_NOTIFY_URL!,
                 method: "PATCH",
                 headers: {
@@ -363,6 +364,7 @@ export const AccountMutation = extendType({
             return account
           }
         } catch (error) {
+          console.log("error -->", error)
           throw error
         }
       },
