@@ -185,26 +185,44 @@ export const AccountMutation = extendType({
           if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
 
           // Verify id token first.
-          const { uid } = await dataSources.walletAPI.verifyUser()
+          const { uid: authUid } = await dataSources.walletAPI.verifyUser()
 
           const { accountType } = input
-          console.log("uid -->", uid)
+          console.log("uid -->", authUid)
           console.log("type -->", accountType)
           if (accountType === "TRADITIONAL") {
             // `TRADITIONAL` account
-            // Create wallet first
-            const { address, uid } = await dataSources.walletAPI.createWallet()
-            const owner = address.toLowerCase()
-            console.log("owner -->", owner)
-
+            // 1. Check if account exists using the provided uid
             let account = await prisma.account.findUnique({
               where: {
-                owner,
+                authUid,
               },
             })
+            console.log("account 1 -->", account)
+            if (account) return account
 
+            // 2. If no account found, create a wallet
+            const { address, uid } = await dataSources.walletAPI.createWallet()
+            const owner = address.toLowerCase()
+            console.log("owner -->", owner, " : ", uid)
+
+            // 3. Find the account again using uid or address.
+            account =
+              (await prisma.account.findUnique({
+                where: {
+                  authUid: uid,
+                },
+              })) ||
+              (await prisma.account.findUnique({
+                where: {
+                  owner,
+                },
+              }))
+
+            console.log("account 2 -->", account)
+
+            // 4. Only no account found here, then we create a new account.
             if (!account) {
-              // Create (if not exist)  an account in the database
               account = await prisma.account.create({
                 data: {
                   type: "TRADITIONAL",
@@ -212,6 +230,7 @@ export const AccountMutation = extendType({
                   authUid: uid,
                 },
               })
+              console.log("account 3 -->", account)
             }
 
             return account
@@ -220,26 +239,27 @@ export const AccountMutation = extendType({
             if (!signature || accountType !== "WALLET")
               throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
-            // Make sure that the authenticated user doesn't own an account yet.
-            const ac = await prisma.account.findUnique({
+            // 1. Find the account using the uid, and if found, we return here
+            let account = await prisma.account.findUnique({
               where: {
-                authUid: uid,
+                authUid,
               },
             })
 
-            if (ac) return ac
+            if (account) return account
 
+            // 2. If no account found, we find the account again using the address
             const ownerAddress = recoverAddress(signature!)
             const owner = ownerAddress.toLowerCase()
 
-            let account = await prisma.account.findUnique({
+            account = await prisma.account.findUnique({
               where: {
                 owner,
               },
             })
 
+            // 3. Only no account found here, then we create a new account.
             if (!account) {
-              // Create (if not exist)  an account in the database
               account = await prisma.account.create({
                 data: {
                   type: accountType,
