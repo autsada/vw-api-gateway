@@ -5,6 +5,7 @@ import {
   enumType,
   inputObjectType,
 } from "nexus"
+import axios from "axios"
 
 import {
   Account as AccountModel,
@@ -18,10 +19,18 @@ import {
   throwError,
   badInputErrMessage,
   unauthorizedErrMessage,
-  badRequestErrMessage,
   notFoundErrMessage,
 } from "./Error"
 import { recoverAddress, validateAuthenticity } from "../lib"
+import type { Environment } from "../types"
+
+const {
+  NODE_ENV,
+  ALCHEMY_WEBHOOK_AUTH_TOKEN,
+  ALCHEMY_WEBHOOK_ID,
+  ALCHEMY_NOTIFY_URL,
+} = process.env
+const env = NODE_ENV as Environment
 
 export const AccountType = enumType(AccountTypeEnum)
 
@@ -87,7 +96,6 @@ export const AccountQuery = extendType({
             // Get user's wallet address
             const { address, uid } =
               await dataSources.walletAPI.getWalletAddress()
-            console.log("address -->", address)
 
             // Check if user is authorized
             if (authUid !== uid)
@@ -153,7 +161,6 @@ export const AccountQuery = extendType({
             return null
           }
         } catch (error) {
-          console.log("my error -->", error)
           throw error
         }
       },
@@ -220,21 +227,17 @@ export const AccountMutation = extendType({
       args: { input: nonNull("GetMyAccountInput") },
       async resolve(_parent, { input }, { dataSources, prisma, signature }) {
         try {
-          console.log("called -->")
           if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
 
           // Verify id token first.
           const { uid: authUid } = await dataSources.walletAPI.verifyUser()
 
           const { accountType } = input
-          console.log("uid -->", authUid)
-          console.log("type -->", accountType)
           if (accountType === "TRADITIONAL") {
             // `TRADITIONAL` account
             // 1. Get the wallet
             const { address, uid } = await dataSources.walletAPI.createWallet()
             const owner = address.toLowerCase()
-            console.log("owner -->", owner, " : ", uid)
 
             // Check if user is authorized
             if (authUid !== uid)
@@ -260,7 +263,6 @@ export const AccountMutation = extendType({
                 })
               }
 
-              console.log("account 1 -->", account)
               return account
             }
 
@@ -284,7 +286,6 @@ export const AccountMutation = extendType({
                 })
               }
 
-              console.log("account 2 -->", account)
               return account
             }
 
@@ -296,7 +297,23 @@ export const AccountMutation = extendType({
                 authUid: uid,
               },
             })
-            console.log("account 3 -->", account)
+
+            if (env !== "production") {
+              // Add the address to Alchemy notify (without waiting)
+              axios({
+                url: ALCHEMY_NOTIFY_URL!,
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-alchemy-token": ALCHEMY_WEBHOOK_AUTH_TOKEN || "",
+                },
+                data: {
+                  webhook_id: ALCHEMY_WEBHOOK_ID,
+                  addresses_to_add: [owner],
+                  addresses_to_remove: [],
+                },
+              })
+            }
 
             return account
           } else {
@@ -304,31 +321,41 @@ export const AccountMutation = extendType({
             if (!signature || accountType !== "WALLET")
               throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
-            // 1. Find the account using the uid, and if found, we return here
-            let account = await prisma.account.findUnique({
-              where: {
-                authUid,
-              },
-            })
-
-            if (account) return account
-
             // 2. If no account found, we find the account again using the address
             const ownerAddress = recoverAddress(signature!)
             const owner = ownerAddress.toLowerCase()
+            if (!owner) throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
-            account = await prisma.account.findUnique({
+            // 1. Find the account using the address, and if found, we return here
+            let account = await prisma.account.findUnique({
               where: {
                 owner,
               },
             })
 
+            if (account) return account
+
             // 3. Only no account found here, then we create a new account.
-            if (!account) {
-              account = await prisma.account.create({
+            account = await prisma.account.create({
+              data: {
+                type: accountType,
+                owner,
+              },
+            })
+
+            if (env !== "production") {
+              // Add the address to Alchemy notify (without waiting)
+              axios({
+                url: ALCHEMY_NOTIFY_URL!,
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-alchemy-token": ALCHEMY_WEBHOOK_AUTH_TOKEN || "",
+                },
                 data: {
-                  type: accountType,
-                  owner,
+                  webhook_id: ALCHEMY_WEBHOOK_ID,
+                  addresses_to_add: [owner],
+                  addresses_to_remove: [],
                 },
               })
             }
@@ -336,7 +363,6 @@ export const AccountMutation = extendType({
             return account
           }
         } catch (error) {
-          console.log("error -->", error)
           throw error
         }
       },
