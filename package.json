@@ -18,6 +18,7 @@
     "@apollo/utils.keyvaluecache": "^3.0.0",
     "@ethersproject/hash": "^5.7.0",
     "@google-cloud/pubsub": "^3.7.3",
+    "agentkeepalive": "^4.5.0",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
