@@ -393,7 +393,7 @@ model Notification {
   profileId  String // An id of the profile that perform an action that causes a creation of the notification
   profile    Profile          @relation("Sender", fields: [profileId], references: [id], onDelete: Cascade)
   receiverId String // A profile id to which the notification should be sent to
-  receiver   Profile          @relation("Receiver", fields: [receiverId], references: [id])
+  receiver   Profile          @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   content    String           @db.VarChar(2000)
   status     ReadStatus       @default(unread)
 }
