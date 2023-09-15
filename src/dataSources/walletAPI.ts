@@ -61,6 +61,16 @@ export class WalletAPI extends RESTDataSource {
   }
 
   /**
+   * @dev A route to add an address to Alchemy Notify.
+   * Connect to Alchemy in the Private Service as it is easier to manage networking in Cloud Run
+   */
+  async addAddressToNotify(address: string): Promise<{
+    status: string
+  }> {
+    return this.post("wallet/notify/add", { body: { address } })
+  }
+
+  /**
    * @dev A route to get balance of a specific address.
    */
   async getBalance(address: string): Promise<{ balance: string }> {

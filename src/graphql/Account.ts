@@ -5,8 +5,6 @@ import {
   enumType,
   inputObjectType,
 } from "nexus"
-import axios from "axios"
-import Agent, { HttpsAgent } from "agentkeepalive"
 
 import {
   Account as AccountModel,
@@ -25,12 +23,7 @@ import {
 import { recoverAddress, validateAuthenticity } from "../lib"
 import type { Environment } from "../types"
 
-const {
-  NODE_ENV,
-  ALCHEMY_WEBHOOK_AUTH_TOKEN,
-  ALCHEMY_WEBHOOK_ID,
-  ALCHEMY_NOTIFY_URL,
-} = process.env
+const { NODE_ENV } = process.env
 const env = NODE_ENV as Environment
 
 export const AccountType = enumType(AccountTypeEnum)
@@ -301,39 +294,7 @@ export const AccountMutation = extendType({
 
             if (env !== "development") {
               // Add the address to Alchemy notify
-              const keepAliveAgent = new Agent({
-                maxSockets: 160,
-                maxFreeSockets: 160,
-                timeout: 60000,
-                freeSocketTimeout: 30000,
-                keepAliveMsecs: 60000,
-              })
-
-              const httpsKeepAliveAgent = new HttpsAgent({
-                maxSockets: 160,
-                maxFreeSockets: 160,
-                timeout: 60000,
-                freeSocketTimeout: 30000,
-                keepAliveMsecs: 60000,
-              })
-              const axiosInstance = axios.create({
-                httpAgent: keepAliveAgent,
-                httpsAgent: httpsKeepAliveAgent,
-              })
-
-              await axiosInstance({
-                url: ALCHEMY_NOTIFY_URL!,
-                method: "PATCH",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-alchemy-token": ALCHEMY_WEBHOOK_AUTH_TOKEN || "",
-                },
-                data: {
-                  webhook_id: ALCHEMY_WEBHOOK_ID,
-                  addresses_to_add: [owner],
-                  addresses_to_remove: [],
-                },
-              })
+              await dataSources.walletAPI.addAddressToNotify(owner)
             }
 
             return account
@@ -366,41 +327,7 @@ export const AccountMutation = extendType({
 
             if (env !== "development") {
               // Add the address to Alchemy notify
-              console.log("add notify -->")
-
-              const keepAliveAgent = new Agent({
-                maxSockets: 160,
-                maxFreeSockets: 160,
-                timeout: 60000,
-                freeSocketTimeout: 30000,
-                keepAliveMsecs: 60000,
-              })
-
-              const httpsKeepAliveAgent = new HttpsAgent({
-                maxSockets: 160,
-                maxFreeSockets: 160,
-                timeout: 60000,
-                freeSocketTimeout: 30000,
-                keepAliveMsecs: 60000,
-              })
-              const axiosInstance = axios.create({
-                httpAgent: keepAliveAgent,
-                httpsAgent: httpsKeepAliveAgent,
-              })
-
-              await axiosInstance({
-                url: ALCHEMY_NOTIFY_URL!,
-                method: "PATCH",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-alchemy-token": ALCHEMY_WEBHOOK_AUTH_TOKEN || "",
-                },
-                data: {
-                  webhook_id: ALCHEMY_WEBHOOK_ID,
-                  addresses_to_add: [owner],
-                  addresses_to_remove: [],
-                },
-              })
+              await dataSources.walletAPI.addAddressToNotify(owner)
             }
 
             return account
