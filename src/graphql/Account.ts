@@ -233,7 +233,7 @@ export const AccountMutation = extendType({
             let wallet = await dataSources.walletAPI.getWalletAddress()
             console.log("wallet 1 -->", wallet)
 
-            if (wallet) {
+            if (wallet && wallet.address) {
               // Wallet found
               const { address, uid } = wallet
               const owner = address?.toLowerCase()
