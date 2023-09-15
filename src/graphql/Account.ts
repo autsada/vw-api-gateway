@@ -291,11 +291,7 @@ export const AccountMutation = extendType({
                 authUid: uid,
               },
             })
-
-            if (env !== "development") {
-              // Add the address to Alchemy notify
-              await dataSources.walletAPI.addAddressToNotify(owner)
-            }
+            // Add the address to Alchemy Notify when a wallet is created in the Private Service
 
             return account
           } else {
@@ -333,7 +329,6 @@ export const AccountMutation = extendType({
             return account
           }
         } catch (error) {
-          console.log("error -->", error)
           throw error
         }
       },
