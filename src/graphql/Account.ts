@@ -256,42 +256,42 @@ export const AccountMutation = extendType({
                   },
                 })
               }
+            } else {
+              // 3. If account not found using the uid, find it again using an address.
+              account = await prisma.account.findUnique({
+                where: {
+                  owner,
+                },
+              })
 
-              return account
-            }
-
-            // 3. If account not found using the uid, find it again using an address.
-            account = await prisma.account.findUnique({
-              where: {
-                owner,
-              },
-            })
-
-            if (account) {
-              if (!account.authUid) {
-                // In this case update the account in the database
-                account = await prisma.account.update({
-                  where: {
-                    owner,
-                  },
+              if (account) {
+                if (!account.authUid) {
+                  // In this case update the account in the database
+                  account = await prisma.account.update({
+                    where: {
+                      owner,
+                    },
+                    data: {
+                      authUid,
+                    },
+                  })
+                }
+              } else {
+                // 4. Only no account found here, then we create a new account.
+                account = await prisma.account.create({
                   data: {
-                    authUid,
+                    type: "TRADITIONAL",
+                    owner,
+                    authUid: uid,
                   },
                 })
               }
-
-              return account
             }
 
-            // 4. Only no account found here, then we create a new account.
-            account = await prisma.account.create({
-              data: {
-                type: "TRADITIONAL",
-                owner,
-                authUid: uid,
-              },
-            })
-            // Add the address to Alchemy Notify when a wallet is created in the Private Service
+            // Add the address to Alchemy notify
+            if (env !== "development") {
+              await dataSources.walletAPI.addAddressToNotify(account.owner)
+            }
 
             return account
           } else {
@@ -299,31 +299,30 @@ export const AccountMutation = extendType({
             if (!signature || accountType !== "WALLET")
               throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
-            // 2. If no account found, we find the account again using the address
             const ownerAddress = recoverAddress(signature!)
             const owner = ownerAddress.toLowerCase()
             if (!owner) throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
-            // 1. Find the account using the address, and if found, we return here
+            // 1. Find the account using the address
             let account = await prisma.account.findUnique({
               where: {
                 owner,
               },
             })
 
-            if (account) return account
+            if (!account) {
+              // 2. If no account found, create a new account.
+              account = await prisma.account.create({
+                data: {
+                  type: accountType,
+                  owner,
+                },
+              })
+            }
 
-            // 3. Only no account found here, then we create a new account.
-            account = await prisma.account.create({
-              data: {
-                type: accountType,
-                owner,
-              },
-            })
-
+            // Add the address to Alchemy notify
             if (env !== "development") {
-              // Add the address to Alchemy notify
-              await dataSources.walletAPI.addAddressToNotify(owner)
+              await dataSources.walletAPI.addAddressToNotify(account.owner)
             }
 
             return account
