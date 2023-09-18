@@ -55,7 +55,8 @@ export const Account = objectType({
 
         if (!account || account.profiles.length === 0) return null
 
-        return getDefaultProfileFromCache(parent.owner, account.profiles)
+        return account.profiles[0]
+        // return getDefaultProfileFromCache(parent.owner, account.profiles)
       },
     })
   },
@@ -440,7 +441,7 @@ export const AccountMutation = extendType({
           if (account?.owner?.toLowerCase() !== profile?.owner?.toLowerCase())
             throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
-          await cacheLoggedInSession(input.address, input.profileId)
+          // await cacheLoggedInSession(input.address, input.profileId)
 
           return { status: "Ok" }
         } catch (error) {
