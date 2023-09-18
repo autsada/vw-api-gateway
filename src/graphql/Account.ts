@@ -231,7 +231,6 @@ export const AccountMutation = extendType({
             // `TRADITIONAL` account
             // Get the wallet
             let wallet = await dataSources.walletAPI.getWalletAddress()
-            console.log("wallet 1 -->", wallet)
 
             if (wallet && wallet.address) {
               // Wallet found
@@ -301,7 +300,6 @@ export const AccountMutation = extendType({
               // No wallet found
               // Create a new wallet
               wallet = await dataSources.walletAPI.createWallet()
-              console.log("wallet 2 -->", wallet)
 
               if (wallet) {
                 const { address, uid } = wallet
@@ -404,7 +402,6 @@ export const AccountMutation = extendType({
             return account
           }
         } catch (error) {
-          console.log("error -->", error)
           throw error
         }
       },
