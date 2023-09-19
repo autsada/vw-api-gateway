@@ -55,8 +55,12 @@ export const Account = objectType({
 
         if (!account || account.profiles.length === 0) return null
 
-        return account.profiles[0]
-        // return getDefaultProfileFromCache(parent.owner, account.profiles)
+        // TODO: Uncomment below code when redis is ready
+        // const profile = await getDefaultProfileFromCache(parent.owner, account.profiles)
+
+        const profile = account.profiles[0]
+
+        return profile
       },
     })
   },
@@ -441,6 +445,7 @@ export const AccountMutation = extendType({
           if (account?.owner?.toLowerCase() !== profile?.owner?.toLowerCase())
             throwError(unauthorizedErrMessage, "UN_AUTHORIZED")
 
+          // TODO: Uncomment below code when redis is ready
           // await cacheLoggedInSession(input.address, input.profileId)
 
           return { status: "Ok" }
