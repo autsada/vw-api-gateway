@@ -59,9 +59,8 @@ export const Account = objectType({
         // const profile = await getDefaultProfileFromCache(parent.owner, account.profiles)
 
         const profile = account.profiles[0]
-        const adjustedImage = profile.image?.replace("firebase", "")
 
-        return { ...profile, image: adjustedImage }
+        return profile
       },
     })
   },
