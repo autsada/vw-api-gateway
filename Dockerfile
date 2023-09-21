@@ -29,5 +29,5 @@ COPY --chown=node:node --from=build /usr/src/app/dist ./
 COPY --chown=node:node --from=build /usr/src/app/package*.json ./
 COPY --chown=node:node --from=prisma /usr/src/app/prisma ./prisma
 COPY --chown=node:node --from=prisma /usr/src/app/node_modules ./node_modules
-EXPOSE 4000
+EXPOSE 8080
 CMD ["dumb-init", "node", "src/app.js"]
