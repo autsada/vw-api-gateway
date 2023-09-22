@@ -2899,6 +2899,7 @@ export const PublishQuery = extendType({
       async resolve(_parent, { input }, { prisma }) {
         try {
           const { cursor, requestorId, tag, publishType } = input
+          console.log("tag -->", tag)
 
           let publishes: PublishType[] = []
 
@@ -2958,7 +2959,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag.replaceAll("-", " "),
+                      search: tag,
                     },
                   },
                 ],
@@ -3003,7 +3004,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag.replaceAll("-", " "),
+                      search: tag,
                     },
                   },
                 ],
@@ -3053,7 +3054,7 @@ export const PublishQuery = extendType({
                 },
                 {
                   tags: {
-                    search: tag.replaceAll("-", " "),
+                    search: tag,
                   },
                 },
               ],
@@ -3099,7 +3100,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag.replaceAll("-", " "),
+                      search: tag,
                     },
                   },
                 ],
@@ -3139,6 +3140,7 @@ export const PublishQuery = extendType({
             }
           }
         } catch (error) {
+          console.log("error -->", error)
           throw error
         }
       },
