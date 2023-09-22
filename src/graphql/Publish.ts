@@ -2958,7 +2958,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag,
+                      search: tag.replaceAll("-", " "),
                     },
                   },
                 ],
@@ -3003,7 +3003,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag,
+                      search: tag.replaceAll("-", " "),
                     },
                   },
                 ],
@@ -3053,7 +3053,7 @@ export const PublishQuery = extendType({
                 },
                 {
                   tags: {
-                    search: tag,
+                    search: tag.replaceAll("-", " "),
                   },
                 },
               ],
@@ -3099,7 +3099,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag,
+                      search: tag.replaceAll("-", " "),
                     },
                   },
                 ],
