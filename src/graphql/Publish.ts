@@ -4339,6 +4339,28 @@ export const PublishMutation = extendType({
                 id: publishId,
               },
             })
+          } else {
+            if (!publish) return null
+
+            // Immediately delete the publish
+            await prisma.publish.delete({
+              where: {
+                id: publishId,
+              },
+            })
+
+            if (publish.contentRef) {
+              // Call the Upload Service to delete the publish's files without waiting.
+              dataSources.uploadAPI.deleteVideo(
+                `publishes/${creator?.name}/${publishId}/`,
+                publishId
+              )
+            }
+
+            if (publish.playback?.videoId) {
+              // Delete the transcoded video on Cloudflare without waiting
+              dataSources.cloudflareAPI.deleteVideo(publish.playback?.videoId)
+            }
           }
 
           return { status: "Ok" }
@@ -4449,7 +4471,27 @@ export const PublishMutation = extendType({
                 },
               })
             } else {
-              return null
+              if (!publish) return null
+
+              // Immediately delete the publish
+              await prisma.publish.delete({
+                where: {
+                  id: publishId,
+                },
+              })
+
+              if (publish.contentRef) {
+                // Call the Upload Service to delete the publish's files without waiting.
+                dataSources.uploadAPI.deleteVideo(
+                  `publishes/${creator?.name}/${publishId}/`,
+                  publishId
+                )
+              }
+
+              if (publish.playback?.videoId) {
+                // Delete the transcoded video on Cloudflare without waiting
+                dataSources.cloudflareAPI.deleteVideo(publish.playback?.videoId)
+              }
             }
           })
 
