@@ -536,11 +536,11 @@ export const PublishQuery = extendType({
                             equals: creatorId,
                           },
                         },
-                        {
-                          publishType: {
-                            equals: "Video",
-                          },
-                        },
+                        // {
+                        //   publishType: {
+                        //     equals: "Video",
+                        //   },
+                        // },
                         {
                           broadcastType: {
                             equals: null,
