@@ -494,15 +494,6 @@ export const PublishQuery = extendType({
         { prisma, dataSources, signature }
       ) => {
         try {
-          const test = await prisma.publish.findMany({
-            where: {
-              publishType: {
-                equals: "Video",
-              },
-            },
-          })
-          console.log("test -->", test)
-
           if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
           const { owner, accountId, creatorId, cursor, publishType } = input
           if (!owner || !accountId || !creatorId)
@@ -545,11 +536,11 @@ export const PublishQuery = extendType({
                             equals: creatorId,
                           },
                         },
-                        {
-                          publishType: {
-                            equals: "Video",
-                          },
-                        },
+                        // {
+                        //   publishType: {
+                        //     equals: "Video",
+                        //   },
+                        // },
                         {
                           broadcastType: {
                             equals: null,
@@ -775,8 +766,6 @@ export const PublishQuery = extendType({
                 createdAt: "desc",
               },
             })
-
-            console.log("publishes -->", publishes)
 
             return {
               pageInfo: {
