@@ -2899,7 +2899,7 @@ export const PublishQuery = extendType({
       async resolve(_parent, { input }, { prisma }) {
         try {
           const { cursor, requestorId, tag, publishType } = input
-          console.log("tag -->", tag)
+          const search = tag.trim().split(" ").join(" & ")
 
           let publishes: PublishType[] = []
 
@@ -2959,7 +2959,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag,
+                      search,
                     },
                   },
                 ],
@@ -3004,7 +3004,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag,
+                      search,
                     },
                   },
                 ],
@@ -3054,7 +3054,7 @@ export const PublishQuery = extendType({
                 },
                 {
                   tags: {
-                    search: tag,
+                    search,
                   },
                 },
               ],
@@ -3100,7 +3100,7 @@ export const PublishQuery = extendType({
                   },
                   {
                     tags: {
-                      search: tag,
+                      search,
                     },
                   },
                 ],
@@ -3177,7 +3177,7 @@ export const PublishQuery = extendType({
           const dontRecommendsList = dontRecommends.map((drc) => drc.targetId)
 
           // Convert tag to catory
-          const search = query
+          const search = query.trim().split(" ").join(" & ")
 
           if (!cursor) {
             publishes = await prisma.publish.findMany({
