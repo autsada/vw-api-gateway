@@ -353,6 +353,11 @@ type FetchFollowsResponse {
   pageInfo: PageInfo!
 }
 
+input FetchLiveVideosInput {
+  cursor: String
+  requestorId: String
+}
+
 input FetchMyPlaylistsInput {
   accountId: String!
   cursor: String
@@ -805,6 +810,7 @@ type Query {
   fetchBookmarks(input: FetchBookmarkInput!): FetchBookmarkResponse
   fetchCommentsByPublishId(input: FetchCommentsByPublishIdInput!): FetchCommentsResponse
   fetchDontRecommends(input: FetchDontRecommendsInput!): FetchDontRecommendsResponse
+  fetchLiveVideos(input: FetchLiveVideosInput!): FetchPublishesResponse
   fetchMyFollowers(input: FetchFollowsInput!): FetchFollowsResponse
   fetchMyFollowing(input: FetchFollowsInput!): FetchFollowsResponse
   fetchMyLiveStream(input: FetchMyPublishesInput!): FetchPublishesResponse

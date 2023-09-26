@@ -148,6 +148,10 @@ export interface NexusGenInputs {
     owner: string; // String!
     requestorId: string; // String!
   }
+  FetchLiveVideosInput: { // input type
+    cursor?: string | null; // String
+    requestorId?: string | null; // String
+  }
   FetchMyPlaylistsInput: { // input type
     accountId: string; // String!
     cursor?: string | null; // String
@@ -1168,6 +1172,7 @@ export interface NexusGenFieldTypes {
     fetchBookmarks: NexusGenRootTypes['FetchBookmarkResponse'] | null; // FetchBookmarkResponse
     fetchCommentsByPublishId: NexusGenRootTypes['FetchCommentsResponse'] | null; // FetchCommentsResponse
     fetchDontRecommends: NexusGenRootTypes['FetchDontRecommendsResponse'] | null; // FetchDontRecommendsResponse
+    fetchLiveVideos: NexusGenRootTypes['FetchPublishesResponse'] | null; // FetchPublishesResponse
     fetchMyFollowers: NexusGenRootTypes['FetchFollowsResponse'] | null; // FetchFollowsResponse
     fetchMyFollowing: NexusGenRootTypes['FetchFollowsResponse'] | null; // FetchFollowsResponse
     fetchMyLiveStream: NexusGenRootTypes['FetchPublishesResponse'] | null; // FetchPublishesResponse
@@ -1644,6 +1649,7 @@ export interface NexusGenFieldTypeNames {
     fetchBookmarks: 'FetchBookmarkResponse'
     fetchCommentsByPublishId: 'FetchCommentsResponse'
     fetchDontRecommends: 'FetchDontRecommendsResponse'
+    fetchLiveVideos: 'FetchPublishesResponse'
     fetchMyFollowers: 'FetchFollowsResponse'
     fetchMyFollowing: 'FetchFollowsResponse'
     fetchMyLiveStream: 'FetchPublishesResponse'
@@ -1892,6 +1898,9 @@ export interface NexusGenArgTypes {
     }
     fetchDontRecommends: { // args
       input: NexusGenInputs['FetchDontRecommendsInput']; // FetchDontRecommendsInput!
+    }
+    fetchLiveVideos: { // args
+      input: NexusGenInputs['FetchLiveVideosInput']; // FetchLiveVideosInput!
     }
     fetchMyFollowers: { // args
       input: NexusGenInputs['FetchFollowsInput']; // FetchFollowsInput!

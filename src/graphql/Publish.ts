@@ -431,6 +431,14 @@ export const FetchPublishesByQueryStringInput = inputObjectType({
   },
 })
 
+export const FetchLiveVideosInput = inputObjectType({
+  name: "FetchLiveVideosInput",
+  definition(t) {
+    t.string("requestorId") // Profile id of the requestor
+    t.string("cursor")
+  },
+})
+
 export const PageInfo = objectType({
   name: "PageInfo",
   definition(t) {
@@ -3412,6 +3420,172 @@ export const PublishQuery = extendType({
                         },
                       },
                     ],
+                  },
+                ],
+              },
+              take: FETCH_QTY,
+              cursor: {
+                id: lastFetchedCursor,
+              },
+              skip: 1, // Skip the cusor
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+
+            return {
+              pageInfo: {
+                count,
+                endCursor: lastFetchedCursor,
+                hasNextPage: nextQuery.length > 0,
+              },
+              edges: publishes.map((pub) => ({
+                cursor: pub.id,
+                node: pub,
+              })),
+            }
+          } else {
+            return {
+              pageInfo: {
+                count,
+                endCursor: null,
+                hasNextPage: false,
+              },
+              edges: publishes.map((pub) => ({
+                cursor: pub.id,
+                node: pub,
+              })),
+            }
+          }
+        } catch (error) {
+          throw error
+        }
+      },
+    })
+
+    t.field("fetchLiveVideos", {
+      type: "FetchPublishesResponse",
+      args: { input: nonNull("FetchLiveVideosInput") },
+      async resolve(_parent, { input }, { prisma }) {
+        try {
+          const { cursor, requestorId } = input
+
+          let publishes: PublishType[] = []
+
+          if (!cursor) {
+            publishes = await prisma.publish.findMany({
+              where: {
+                AND: [
+                  {
+                    visibility: {
+                      equals: "public",
+                    },
+                  },
+                  {
+                    publishType: {
+                      equals: "Video",
+                    },
+                  },
+                  {
+                    uploading: false,
+                  },
+                  {
+                    streamType: {
+                      equals: "Live",
+                    },
+                  },
+                ],
+              },
+              take: FETCH_QTY,
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+          } else {
+            publishes = await prisma.publish.findMany({
+              where: {
+                AND: [
+                  {
+                    visibility: {
+                      equals: "public",
+                    },
+                  },
+                  {
+                    publishType: {
+                      equals: "Video",
+                    },
+                  },
+                  {
+                    uploading: false,
+                  },
+                  {
+                    streamType: {
+                      equals: "Live",
+                    },
+                  },
+                ],
+              },
+              take: FETCH_QTY,
+              cursor: {
+                id: cursor,
+              },
+              skip: 1, // Skip the cursor
+              orderBy: {
+                createdAt: "desc",
+              },
+            })
+          }
+
+          const count = await prisma.publish.count({
+            where: {
+              AND: [
+                {
+                  visibility: {
+                    equals: "public",
+                  },
+                },
+                {
+                  publishType: {
+                    equals: "Video",
+                  },
+                },
+                {
+                  uploading: false,
+                },
+                {
+                  streamType: {
+                    equals: "Live",
+                  },
+                },
+              ],
+            },
+          })
+
+          if (publishes.length === FETCH_QTY) {
+            // Fetch result is equal to take quantity, so it has posibility that there are more to be fetched.
+            const lastFetchedCursor = publishes[publishes.length - 1].id
+
+            // Check if there is next page
+            let nextQuery = await prisma.publish.findMany({
+              where: {
+                AND: [
+                  {
+                    visibility: {
+                      equals: "public",
+                    },
+                  },
+                  {
+                    publishType: {
+                      equals: "Video",
+                    },
+                  },
+                  {
+                    uploading: false,
+                  },
+                  {
+                    streamType: {
+                      equals: "Live",
+                    },
                   },
                 ],
               },
