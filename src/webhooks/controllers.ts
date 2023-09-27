@@ -21,7 +21,6 @@ const {
  */
 export async function onAddressUpdated(req: Request, res: Response) {
   try {
-    console.log("called -->")
     // Get signature from headers
     const signature = req.headers["x-alchemy-signature"]
     // Get raw body from req
@@ -33,7 +32,6 @@ export async function onAddressUpdated(req: Request, res: Response) {
     const body = req.body
     const activity = body?.event?.activity[0]
 
-    console.log("activity -->", activity)
     if (activity && activity.value && activity.value > 0) {
       // Find users that relate to the activity
       const fromAddress = activity.fromAddress.toLowerCase()
@@ -46,7 +44,6 @@ export async function onAddressUpdated(req: Request, res: Response) {
 
     res.status(200).end()
   } catch (error) {
-    console.log("error -->", error)
     res.status(500).end()
   }
 }
