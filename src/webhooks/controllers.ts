@@ -12,6 +12,7 @@ const {
   CLOUDFLAR_ACCOUNT_ID,
   PUBLISH_PROCESSING_TOPIC,
   PUBLISH_DELETION_TOPIC,
+  ADDRESS_ACTIVITY_TOPIC,
 } = process.env
 
 /**
@@ -20,6 +21,7 @@ const {
  */
 export async function onAddressUpdated(req: Request, res: Response) {
   try {
+    console.log("called -->")
     // Get signature from headers
     const signature = req.headers["x-alchemy-signature"]
     // Get raw body from req
@@ -29,11 +31,22 @@ export async function onAddressUpdated(req: Request, res: Response) {
     const isValid = isValidAchemySignature(rawBody, signature as string)
     if (!isValid) throw new Error("Request corrupted in transit.")
     const body = req.body
+    const activity = body?.event?.activity[0]
 
-    // TODO: Inform the UIs
+    console.log("activity -->", activity)
+    if (activity && activity.value && activity.value > 0) {
+      // Find users that relate to the activity
+      const fromAddress = activity.fromAddress.toLowerCase()
+      const toAddress = activity.toAddress.toLowerCase()
+      const message = JSON.stringify({ fromAddress, toAddress })
+
+      // Publish a message to pub/sub
+      await publishMessage(ADDRESS_ACTIVITY_TOPIC!, message)
+    }
 
     res.status(200).end()
   } catch (error) {
+    console.log("error -->", error)
     res.status(500).end()
   }
 }
