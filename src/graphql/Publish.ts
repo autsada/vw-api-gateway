@@ -4745,12 +4745,12 @@ export const PublishMutation = extendType({
             },
           })
           if (!receiver) throw new Error("Receiver not found")
+          console.log("receiver -->", receiver)
 
-          const { result } = await dataSources.walletAPI.sendTips(
-            receiver.owner,
-            qty
-          )
-          const { from, to, amount, fee } = result
+          const data = await dataSources.walletAPI.sendTips(receiver.owner, qty)
+          console.log("data -->", data)
+          console.log("result -->", data?.result)
+          const { from, to, amount, fee } = data.result
 
           // Create a tip in the database
           await prisma.tip.create({
@@ -4765,8 +4765,9 @@ export const PublishMutation = extendType({
             },
           })
 
-          return result
+          return data.result
         } catch (error) {
+          console.log("error -->", error)
           throw error
         }
       },
