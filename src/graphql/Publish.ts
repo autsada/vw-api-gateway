@@ -4745,11 +4745,8 @@ export const PublishMutation = extendType({
             },
           })
           if (!receiver) throw new Error("Receiver not found")
-          console.log("receiver -->", receiver)
 
           const data = await dataSources.walletAPI.sendTips(receiver.owner, qty)
-          console.log("data -->", data)
-          console.log("result -->", data?.result)
           const { from, to, amount, fee } = data.result
 
           // Create a tip in the database
@@ -4767,7 +4764,6 @@ export const PublishMutation = extendType({
 
           return data.result
         } catch (error) {
-          console.log("error -->", error)
           throw error
         }
       },
