@@ -93,6 +93,13 @@ export interface NexusGenInputs {
     name: string; // String!
     owner: string; // String!
   }
+  CreateTipRecordInput: { // input type
+    accountId: string; // String!
+    owner: string; // String!
+    profileId: string; // String!
+    publishId: string; // String!
+    receiverId: string; // String!
+  }
   DeleteCommentInput: { // input type
     accountId: string; // String!
     commentId: string; // String!
@@ -740,22 +747,16 @@ export interface NexusGenObjects {
     streamId: string; // String!
     url: string; // String!
   }
-  SendTipsResult: { // root type
-    amount: string; // String!
-    fee: string; // String!
-    from: string; // String!
-    to: string; // String!
-  }
   Tip: { // root type
-    amount: string; // String!
+    amount?: string | null; // String
     createdAt: NexusGenScalars['DateTime']; // DateTime!
-    fee: string; // String!
-    from: string; // String!
+    fee?: string | null; // String
+    from?: string | null; // String
     id: string; // ID!
     publishId: string; // String!
     receiverId: string; // String!
     senderId: string; // String!
-    to: string; // String!
+    to?: string | null; // String
   }
   ValidateAuthResult: { // root type
     isAuthenticated: boolean; // Boolean!
@@ -1012,7 +1013,7 @@ export interface NexusGenFieldTypes {
     removeFromWatchLater: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     reportPublish: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     requestLiveStream: NexusGenRootTypes['RequestLiveStreamResult'] | null; // RequestLiveStreamResult
-    sendTips: NexusGenRootTypes['SendTipsResult'] | null; // SendTipsResult
+    sendTips: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateBannerImage: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateBlog: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateDisplayName: NexusGenRootTypes['WriteResult'] | null; // WriteResult
@@ -1222,17 +1223,11 @@ export interface NexusGenFieldTypes {
     streamId: string; // String!
     url: string; // String!
   }
-  SendTipsResult: { // field return type
-    amount: string; // String!
-    fee: string; // String!
-    from: string; // String!
-    to: string; // String!
-  }
   Tip: { // field return type
-    amount: string; // String!
+    amount: string | null; // String
     createdAt: NexusGenScalars['DateTime']; // DateTime!
-    fee: string; // String!
-    from: string; // String!
+    fee: string | null; // String
+    from: string | null; // String
     id: string; // ID!
     publish: NexusGenRootTypes['Publish']; // Publish!
     publishId: string; // String!
@@ -1240,7 +1235,7 @@ export interface NexusGenFieldTypes {
     receiverId: string; // String!
     sender: NexusGenRootTypes['Profile']; // Profile!
     senderId: string; // String!
-    to: string; // String!
+    to: string | null; // String
   }
   ValidateAuthResult: { // field return type
     isAuthenticated: boolean; // Boolean!
@@ -1489,7 +1484,7 @@ export interface NexusGenFieldTypeNames {
     removeFromWatchLater: 'WriteResult'
     reportPublish: 'WriteResult'
     requestLiveStream: 'RequestLiveStreamResult'
-    sendTips: 'SendTipsResult'
+    sendTips: 'WriteResult'
     updateBannerImage: 'WriteResult'
     updateBlog: 'WriteResult'
     updateDisplayName: 'WriteResult'
@@ -1698,12 +1693,6 @@ export interface NexusGenFieldTypeNames {
     passphrase: 'String'
     streamId: 'String'
     url: 'String'
-  }
-  SendTipsResult: { // field return type name
-    amount: 'String'
-    fee: 'String'
-    from: 'String'
-    to: 'String'
   }
   Tip: { // field return type name
     amount: 'String'

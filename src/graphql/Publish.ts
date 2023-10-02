@@ -25,6 +25,7 @@ import {
   BroadcastType as BroadcastTypeEnum,
   LiveStatus as LiveStatusEnum,
 } from "nexus-prisma"
+import { ethers } from "ethers"
 
 import { NexusGenInputs } from "../typegen"
 import {
@@ -3750,6 +3751,7 @@ export const CalculateTipsResult = objectType({
 
 /**
  * An input type for `sendTips` mutation
+ * For `TRADITIONAL` account
  */
 export const SendTipsInput = inputObjectType({
   name: "SendTipsInput",
@@ -3764,15 +3766,16 @@ export const SendTipsInput = inputObjectType({
 })
 
 /**
- * A result for `sendTips` mutation
+ * An input type for create a tip record mutation
  */
-export const SendTipsResult = objectType({
-  name: "SendTipsResult",
+export const CreateTipRecordInput = inputObjectType({
+  name: "CreateTipRecordInput",
   definition(t) {
-    t.nonNull.string("from") // From address
-    t.nonNull.string("to") // To address
-    t.nonNull.string("amount")
-    t.nonNull.string("fee")
+    t.nonNull.string("owner")
+    t.nonNull.string("accountId")
+    t.nonNull.string("profileId")
+    t.nonNull.string("publishId") // A publish id associated with the tips
+    t.nonNull.string("receiverId") // A profile id of the receiver
   },
 })
 
@@ -4694,7 +4697,7 @@ export const PublishMutation = extendType({
 
     // For `TRADITIONAL` accounts only
     t.field("sendTips", {
-      type: "SendTipsResult",
+      type: "WriteResult",
       args: { input: nonNull("SendTipsInput") },
       resolve: async (
         _parent,
@@ -4746,23 +4749,28 @@ export const PublishMutation = extendType({
           })
           if (!receiver) throw new Error("Receiver not found")
 
-          const data = await dataSources.walletAPI.sendTips(receiver.owner, qty)
-          const { from, to, amount, fee } = data.result
-
-          // Create a tip in the database
-          await prisma.tip.create({
-            data: {
-              senderId: profileId,
-              from: from.toLowerCase(),
-              publishId,
-              receiverId,
-              to: to.toLowerCase(),
-              amount,
-              fee,
-            },
+          await dataSources.walletAPI.sendTips({
+            senderId: profileId,
+            receiverId,
+            publishId,
+            to: receiver.owner,
+            qty,
           })
 
-          return data.result
+          // // Create a tip in the database
+          // await prisma.tip.create({
+          //   data: {
+          //     senderId: profileId,
+          //     receiverId,
+          //     publishId,
+          //     // from: from.toLowerCase(),
+          //     // to: to.toLowerCase(),
+          //     // amount,
+          //     // fee,
+          //   },
+          // })
+
+          return { status: "Ok" }
         } catch (error) {
           throw error
         }

@@ -234,14 +234,14 @@ model Tip {
   createdAt  DateTime @default(now())
   senderId   String // Sender profile id
   sender     Profile  @relation("Sent", fields: [senderId], references: [id])
-  from       String // Sender wallet address
+  from       String? // Sender wallet address
   publish    Publish  @relation(fields: [publishId], references: [id])
   publishId  String
   receiver   Profile  @relation("Received", fields: [receiverId], references: [id])
   receiverId String // Receiver profile id
-  to         String // Receiver wallet address
-  amount     String // Use String for ether amount
-  fee        String // Use String for ether amount
+  to         String? // Receiver wallet address
+  amount     String? // Use String for ether amount
+  fee        String? // Use String for ether amount
 }
 
 enum CommentType {

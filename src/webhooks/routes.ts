@@ -1,4 +1,5 @@
 import express from "express"
+import { ethers } from "ethers"
 
 import {
   onAddressUpdated,
@@ -8,6 +9,7 @@ import {
   onTranscodingFinished,
   onVideoDeleted,
   getVideoDetail,
+  onSendTipFinished,
 } from "./controllers"
 import { validateCloudflareSignature } from "./middlewares"
 
@@ -24,3 +26,4 @@ router.post(
 )
 router.post("/pubsub/video-deleted", onVideoDeleted)
 router.get("/cloudflare/video", getVideoDetail) // For testing
+router.post("/pubsub/tip-finished", onSendTipFinished)

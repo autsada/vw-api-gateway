@@ -289,3 +289,45 @@ export async function getVideoDetail(req: Request, res: Response) {
     res.status(500).end()
   }
 }
+
+export async function onSendTipFinished(req: Request, res: Response) {
+  try {
+    if (!req.body) {
+      const msg = "no Pub/Sub message received"
+      console.error(`error: ${msg}`)
+      res.status(400).send(`Bad Request: ${msg}`)
+      return
+    }
+    if (!req.body.message) {
+      const msg = "invalid Pub/Sub message format"
+      console.error(`error: ${msg}`)
+      res.status(400).send(`Bad Request: ${msg}`)
+      return
+    }
+
+    // Get the the data from the request
+    const pubSubMessage = req.body.message
+    const data = pubSubMessage.data
+      ? Buffer.from(pubSubMessage.data, "base64").toString().trim()
+      : undefined
+
+    if (!data) {
+      const msg = "No data found"
+      console.error(`error: ${msg}`)
+      res.status(400).send(`Bad Request: ${msg}`)
+      return
+    }
+
+    console.log("data -->", data)
+    const decryptedData = decryptString(data)
+    console.log("decryped data -->", decryptedData)
+
+    const tipData = JSON.parse(decryptedData)
+    console.log("tip data -->", tipData)
+    // Find the tip records
+
+    res.status(204).send()
+  } catch (error) {
+    res.status(500).end()
+  }
+}

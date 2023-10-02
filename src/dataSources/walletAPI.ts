@@ -89,10 +89,13 @@ export class WalletAPI extends RESTDataSource {
    * @param to - a wallet address to send the tips to
    * @param qty usd amount to be sent
    */
-  async sendTips(
-    to: string,
+  async sendTips(input: {
+    senderId: string
+    receiverId: string
+    publishId: string
+    to: string
     qty: number
-  ): Promise<{
+  }): Promise<{
     result: {
       from: string
       to: string
@@ -100,6 +103,6 @@ export class WalletAPI extends RESTDataSource {
       fee: string
     }
   }> {
-    return this.post("wallet/tips/send", { body: { to, qty } })
+    return this.post("wallet/tips/send", { body: input })
   }
 }
