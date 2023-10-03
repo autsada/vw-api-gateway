@@ -3766,16 +3766,12 @@ export const SendTipsInput = inputObjectType({
 })
 
 /**
- * An input type for create a tip record mutation
+ * A return type of the send tips mutation
  */
-export const CreateTipRecordInput = inputObjectType({
-  name: "CreateTipRecordInput",
+export const SendTipsResult = objectType({
+  name: "SendTipsResult",
   definition(t) {
-    t.nonNull.string("owner")
-    t.nonNull.string("accountId")
-    t.nonNull.string("profileId")
-    t.nonNull.string("publishId") // A publish id associated with the tips
-    t.nonNull.string("receiverId") // A profile id of the receiver
+    t.nonNull.string("id")
   },
 })
 
@@ -4697,13 +4693,15 @@ export const PublishMutation = extendType({
 
     // For `TRADITIONAL` accounts only
     t.field("sendTips", {
-      type: "WriteResult",
+      type: "SendTipsResult",
       args: { input: nonNull("SendTipsInput") },
       resolve: async (
         _parent,
         { input },
         { dataSources, prisma, signature }
       ) => {
+        let tipId = ""
+
         try {
           // Validate input
           if (!input) throwError(badInputErrMessage, "BAD_USER_INPUT")
@@ -4749,16 +4747,34 @@ export const PublishMutation = extendType({
           })
           if (!receiver) throw new Error("Receiver not found")
 
-          await dataSources.walletAPI.sendTips({
-            senderId: profileId,
-            receiverId,
-            publishId,
-            to: receiver.owner,
-            qty,
+          // Create a tip in the database
+          const tip = await prisma.tip.create({
+            data: {
+              senderId: profileId,
+              receiverId,
+              publishId,
+            },
           })
 
-          return { status: "Ok" }
+          tipId = tip.id
+
+          if (account?.type === "TRADITIONAL") {
+            // For tradtional account, send tips from the Private service
+            await dataSources.walletAPI.sendTips({
+              tipId,
+              to: receiver.owner,
+              qty,
+            })
+          }
+
+          return { id: tipId }
         } catch (error) {
+          // In case of error occurred, delete the tip in the database.
+          await prisma.tip.delete({
+            where: {
+              id: tipId,
+            },
+          })
           throw error
         }
       },

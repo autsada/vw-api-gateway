@@ -320,29 +320,35 @@ export async function onSendTipFinished(req: Request, res: Response) {
 
     const decryptedData = decryptString(data)
 
-    const { senderId, receiverId, publishId, from, to, amount, fee } =
-      JSON.parse(decryptedData) as {
-        senderId: string
-        receiverId: string
-        publishId: string
-        from: string
-        to: string
-        amount: string
-        fee: string
-      }
+    const { tipId, from, to, amount, fee } = JSON.parse(decryptedData) as {
+      tipId: string
+      from: string
+      to: string
+      amount: string
+      fee: string
+    }
 
-    // Create a tip record
-    await prisma.tip.create({
-      data: {
-        senderId,
-        receiverId,
-        publishId,
-        from: from.toLowerCase(),
-        to: to.toLowerCase(),
-        amount,
-        fee,
+    // Find and update the tip record in the database
+    const tip = await prisma.tip.findUnique({
+      where: {
+        id: tipId,
       },
     })
+
+    if (tip) {
+      // Update the tip
+      await prisma.tip.update({
+        where: {
+          id: tipId,
+        },
+        data: {
+          from: from.toLowerCase(),
+          to: to.toLowerCase(),
+          amount,
+          fee,
+        },
+      })
+    }
 
     res.status(204).send()
   } catch (error) {

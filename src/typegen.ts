@@ -93,13 +93,6 @@ export interface NexusGenInputs {
     name: string; // String!
     owner: string; // String!
   }
-  CreateTipRecordInput: { // input type
-    accountId: string; // String!
-    owner: string; // String!
-    profileId: string; // String!
-    publishId: string; // String!
-    receiverId: string; // String!
-  }
   DeleteCommentInput: { // input type
     accountId: string; // String!
     commentId: string; // String!
@@ -747,6 +740,9 @@ export interface NexusGenObjects {
     streamId: string; // String!
     url: string; // String!
   }
+  SendTipsResult: { // root type
+    id: string; // String!
+  }
   Tip: { // root type
     amount?: string | null; // String
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -1013,7 +1009,7 @@ export interface NexusGenFieldTypes {
     removeFromWatchLater: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     reportPublish: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     requestLiveStream: NexusGenRootTypes['RequestLiveStreamResult'] | null; // RequestLiveStreamResult
-    sendTips: NexusGenRootTypes['WriteResult'] | null; // WriteResult
+    sendTips: NexusGenRootTypes['SendTipsResult'] | null; // SendTipsResult
     updateBannerImage: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateBlog: NexusGenRootTypes['WriteResult'] | null; // WriteResult
     updateDisplayName: NexusGenRootTypes['WriteResult'] | null; // WriteResult
@@ -1222,6 +1218,9 @@ export interface NexusGenFieldTypes {
     passphrase: string; // String!
     streamId: string; // String!
     url: string; // String!
+  }
+  SendTipsResult: { // field return type
+    id: string; // String!
   }
   Tip: { // field return type
     amount: string | null; // String
@@ -1484,7 +1483,7 @@ export interface NexusGenFieldTypeNames {
     removeFromWatchLater: 'WriteResult'
     reportPublish: 'WriteResult'
     requestLiveStream: 'RequestLiveStreamResult'
-    sendTips: 'WriteResult'
+    sendTips: 'SendTipsResult'
     updateBannerImage: 'WriteResult'
     updateBlog: 'WriteResult'
     updateDisplayName: 'WriteResult'
@@ -1693,6 +1692,9 @@ export interface NexusGenFieldTypeNames {
     passphrase: 'String'
     streamId: 'String'
     url: 'String'
+  }
+  SendTipsResult: { // field return type name
+    id: 'String'
   }
   Tip: { // field return type name
     amount: 'String'

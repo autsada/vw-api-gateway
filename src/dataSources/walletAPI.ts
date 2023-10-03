@@ -86,16 +86,11 @@ export class WalletAPI extends RESTDataSource {
 
   /**
    * @dev Send tips to a profile
+   * @param tipId - a tip id in the database
    * @param to - a wallet address to send the tips to
    * @param qty usd amount to be sent
    */
-  async sendTips(input: {
-    senderId: string
-    receiverId: string
-    publishId: string
-    to: string
-    qty: number
-  }): Promise<{
+  async sendTips(input: { tipId: string; to: string; qty: number }): Promise<{
     result: {
       from: string
       to: string
