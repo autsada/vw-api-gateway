@@ -332,7 +332,7 @@ export async function onSendTipFinished(req: Request, res: Response) {
       }
 
     // Create a tip record
-    const row = await prisma.tip.create({
+    await prisma.tip.create({
       data: {
         senderId,
         receiverId,
@@ -343,11 +343,9 @@ export async function onSendTipFinished(req: Request, res: Response) {
         fee,
       },
     })
-    console.log("row -->", row.id)
 
     res.status(204).send()
   } catch (error) {
-    console.log("error -->", error)
     res.status(500).end()
   }
 }
