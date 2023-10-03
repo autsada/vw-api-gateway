@@ -318,16 +318,36 @@ export async function onSendTipFinished(req: Request, res: Response) {
       return
     }
 
-    console.log("data -->", typeof data, " : ", data)
     const decryptedData = decryptString(data)
-    console.log("decrypted data -->", decryptedData)
 
-    const tipData = JSON.parse(decryptedData)
-    console.log("tip data -->", tipData)
-    // Find the tip records
+    const { senderId, receiverId, publishId, from, to, amount, fee } =
+      JSON.parse(decryptedData) as {
+        senderId: string
+        receiverId: string
+        publishId: string
+        from: string
+        to: string
+        amount: string
+        fee: string
+      }
+
+    // Create a tip record
+    const row = await prisma.tip.create({
+      data: {
+        senderId,
+        receiverId,
+        publishId,
+        from: from.toLowerCase(),
+        to: to.toLowerCase(),
+        amount,
+        fee,
+      },
+    })
+    console.log("row -->", row.id)
 
     res.status(204).send()
   } catch (error) {
+    console.log("error -->", error)
     res.status(500).end()
   }
 }

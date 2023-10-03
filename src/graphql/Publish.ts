@@ -4757,19 +4757,6 @@ export const PublishMutation = extendType({
             qty,
           })
 
-          // // Create a tip in the database
-          // await prisma.tip.create({
-          //   data: {
-          //     senderId: profileId,
-          //     receiverId,
-          //     publishId,
-          //     // from: from.toLowerCase(),
-          //     // to: to.toLowerCase(),
-          //     // amount,
-          //     // fee,
-          //   },
-          // })
-
           return { status: "Ok" }
         } catch (error) {
           throw error
