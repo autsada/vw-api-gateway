@@ -318,9 +318,9 @@ export async function onSendTipFinished(req: Request, res: Response) {
       return
     }
 
-    console.log("data -->", data)
+    console.log("data -->", typeof data, " : ", data)
     const decryptedData = decryptString(data)
-    console.log("decryped data -->", decryptedData)
+    console.log("decrypted data -->", decryptedData)
 
     const tipData = JSON.parse(decryptedData)
     console.log("tip data -->", tipData)
