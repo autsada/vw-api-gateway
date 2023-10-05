@@ -25,7 +25,6 @@ import {
   BroadcastType as BroadcastTypeEnum,
   LiveStatus as LiveStatusEnum,
 } from "nexus-prisma"
-import { ethers } from "ethers"
 
 import { NexusGenInputs } from "../typegen"
 import {
@@ -41,7 +40,7 @@ import {
   getPostExcerpt,
   validateAuthenticity,
 } from "../lib"
-import { FETCH_QTY } from "../lib/constants"
+import { FETCH_QTY, BLOG_FETCH_QTY } from "../lib/constants"
 import { publishMessage } from "../lib/pubsub"
 
 const { PUBLISH_PROCESSING_TOPIC, NEW_NOTIFICATION_TOPIC } = process.env
@@ -1004,7 +1003,7 @@ export const PublishQuery = extendType({
                         },
                       ],
                     },
-              take: FETCH_QTY,
+              take: publishType === "blogs" ? BLOG_FETCH_QTY : FETCH_QTY,
               orderBy:
                 orderBy === "popular"
                   ? [
@@ -1193,7 +1192,7 @@ export const PublishQuery = extendType({
                         },
                       ],
                     },
-              take: FETCH_QTY,
+              take: publishType === "blogs" ? BLOG_FETCH_QTY : FETCH_QTY,
               cursor: {
                 id: cursor,
               },
@@ -1392,7 +1391,7 @@ export const PublishQuery = extendType({
                         },
                       ],
                     },
-              take: FETCH_QTY,
+              take: publishType === "blogs" ? BLOG_FETCH_QTY : FETCH_QTY,
               cursor: {
                 id: lastFetchedCursor,
               },
@@ -2636,7 +2635,7 @@ export const PublishQuery = extendType({
                       },
                     ],
                   },
-                  take: FETCH_QTY,
+                  take: BLOG_FETCH_QTY,
                   orderBy: {
                     createdAt: "desc",
                   },
@@ -2681,7 +2680,7 @@ export const PublishQuery = extendType({
                             },
                           ],
                   },
-                  take: FETCH_QTY,
+                  take: BLOG_FETCH_QTY,
                   orderBy: {
                     createdAt: "desc",
                   },
@@ -2722,7 +2721,7 @@ export const PublishQuery = extendType({
                     id: cursor,
                   },
                   skip: 1, // Skip cursor
-                  take: FETCH_QTY,
+                  take: BLOG_FETCH_QTY,
                   orderBy: {
                     createdAt: "desc",
                   },
@@ -2771,14 +2770,14 @@ export const PublishQuery = extendType({
                     id: cursor,
                   },
                   skip: 1, // Skip cursor
-                  take: FETCH_QTY,
+                  take: BLOG_FETCH_QTY,
                   orderBy: {
                     createdAt: "desc",
                   },
                 })
           }
 
-          if (blogs.length === FETCH_QTY) {
+          if (blogs.length === BLOG_FETCH_QTY) {
             // Fetch result is equal to take quantity, so it has posibility that there are more to be fetched.
             const lastFetchedCursor = blogs[blogs.length - 1].id
 
@@ -2818,7 +2817,7 @@ export const PublishQuery = extendType({
                     id: lastFetchedCursor,
                   },
                   skip: 1, // Skip the cusor
-                  take: FETCH_QTY,
+                  take: BLOG_FETCH_QTY,
                   orderBy: {
                     createdAt: "desc",
                   },
@@ -2867,7 +2866,7 @@ export const PublishQuery = extendType({
                     id: lastFetchedCursor,
                   },
                   skip: 1, // Skip the cusor
-                  take: FETCH_QTY,
+                  take: BLOG_FETCH_QTY,
                   orderBy: {
                     createdAt: "desc",
                   },
