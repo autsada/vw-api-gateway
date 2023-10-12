@@ -1218,7 +1218,12 @@ export const PublishQuery = extendType({
             })
           }
 
-          if (publishes.length === FETCH_QTY) {
+          const possibleHasNextPage =
+            publishType === "blogs"
+              ? publishes.length === BLOG_FETCH_QTY
+              : publishes.length === FETCH_QTY
+
+          if (possibleHasNextPage) {
             // Fetch result is equal to take quantity, so it has posibility that there are more to be fetched.
             const lastFetchedCursor = publishes[publishes.length - 1].id
 
